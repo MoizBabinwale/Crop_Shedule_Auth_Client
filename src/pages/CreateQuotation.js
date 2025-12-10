@@ -27,7 +27,6 @@ function CropList() {
   const [selectedScheduleId, setSelectedScheduleId] = useState(false);
   const [selectedCropId, setSelectedCropId] = useState("");
   const [farmerInfo, setFarmerInfo] = useState({
-    _id: "",
     name: "",
     place: "",
     tahsil: "",
@@ -211,7 +210,7 @@ function CropList() {
       const allProducts = (schedule.weeks || []).flatMap((week) => week.products || []);
 
       // 🗓️ Selected new start date by user
-      const newStartDate = farmerData.startDate ? new Date(farmerData.startDate) : new Date();
+      const newStartDate = farmerData.startDate ? new Date(farmerData.startDate) : null;
 
       // 🗓️ Compute date intervals (differences in days between each original week)
       let dateDiffs = [];
@@ -285,7 +284,6 @@ function CropList() {
       setLoading(false);
       setAcreValues({});
       setFarmerInfo({
-        _id: "",
         name: "",
         place: "",
         tahsil: "",
@@ -329,26 +327,6 @@ function CropList() {
     })
     .filter((crop) => crop.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const [userData, setUserData] = useState(null);
-
-  // Load logged in user
-  useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem("user"));
-    setUserData(loggedInUser);
-
-    if (loggedInUser) {
-      setFarmerInfo({
-        _id: loggedInUser._id || "",
-        name: loggedInUser.name || "",
-        place: loggedInUser.place || "",
-        tahsil: loggedInUser.tahsil || "",
-        district: loggedInUser.district || "",
-        state: loggedInUser.state || "",
-        startDate: "",
-      });
-    }
-  }, []);
-
   return (
     <>
       {loading ? (
@@ -375,18 +353,6 @@ function CropList() {
                 <option value="weeks">Sort by Weeks</option>
                 <option value="createdAt">Sort by Date (Newest)</option>
               </select>
-
-              {/* ➕ Add Button */}
-              <button
-                onClick={() => {
-                  setIsDialogOpen(true);
-                  setEditCropId(null);
-                  setNewCrop({ name: "", weeks: "", description: "" });
-                }}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md transition"
-              >
-                + Add Crop
-              </button>
             </div>
           </div>
 
@@ -402,9 +368,9 @@ function CropList() {
               >
                 {/* Crop Info */}
                 <div className="flex-1">
-                  <Link to={`/form1?name=${encodeURIComponent(crop.name)}&weeks=${crop.weeks}&id=${crop._id}`} className="text-lg font-semibold text-green-900 hover:underline">
+                  <div className="text-lg font-semibold text-green-900 hover:underline">
                     {crop.name} – {crop.weeks} weeks
-                  </Link>
+                  </div>
                   {crop.description && <p className="text-sm text-gray-600 mt-1">{crop.description}</p>}
                 </div>
 
@@ -422,222 +388,39 @@ function CropList() {
                   }
                 />
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => {
-                      const acres = parseFloat(acreValues[crop._id]);
-
-                      if (!acres || acres <= 0) {
-                        toast.warning("कृपया 0 पेक्षा जास्त एकर प्रविष्ट करा!", {
-                          position: "top-center",
-                          autoClose: 3000,
-                        });
-                        return;
-                      }
-
-                      // Reset modal fields with latest user data
-                      if (userData) {
-                        setFarmerInfo({
-                          _id: userData._id || "",
-                          name: userData.name || "",
-                          place: userData.place || "",
-                          tahsil: userData.tahsil || "",
-                          district: userData.district || "",
-                          state: userData.state || "",
-                          startDate: "",
-                        });
-                      }
-
-                      setShowModal(true);
-                      setSelectedCropId(crop._id);
-                      setSelectedScheduleId(crop.scheduleId);
-                    }}
-                    className="bg-green-100 text-green-700 hover:bg-green-200 p-2 rounded-full shadow"
-                    title="Generate Quotation"
-                  >
-                    <FaFileInvoice />
-                  </button>
-
-                  {crop.hasBill && crop.scheduleId && (
-                    <button
-                      onClick={() => navigate(`/schedulebill/view/${crop.scheduleId}`)}
-                      className="bg-green-100 text-green-700 hover:bg-green-200 p-2 rounded-full shadow"
-                      title="View Schedule Bill"
-                    >
-                      🧾
-                    </button>
-                  )}
-
-                  <button onClick={() => handleEdit(crop)} className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 p-2 rounded-full shadow" title="Edit Crop">
-                    <FaEdit />
-                  </button>
-
-                  <button onClick={() => handleDelete(crop._id)} className="bg-red-100 text-red-600 hover:bg-red-200 p-2 rounded-full shadow" title="Delete Crop">
-                    <FaTrash />
-                  </button>
-                  <button onClick={() => handleCopyCrop(crop._id)} className="bg-green-100 text-green-600 hover:bg-green-200 p-2 rounded-full shadow" title="Copy Crop">
-                    <FaCopy />
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    const acres = parseFloat(acreValues[crop._id]);
+                    if (!acres || acres <= 0) {
+                      toast.warning("कृपया 0 पेक्षा जास्त एकर प्रविष्ट करा!", {
+                        position: "top-center",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        theme: "light",
+                      });
+                      return;
+                    }
+                    setShowModal(true);
+                    setSelectedCropId(crop._id);
+                    setSelectedScheduleId(crop.scheduleId);
+                  }}
+                  className="bg-green-100 text-green-700 hover:bg-green-200 p-2 rounded-full shadow"
+                  title="Generate Quotation"
+                >
+                  <FaFileInvoice />
+                </button>
               </motion.div>
             ))}
           </div>
-
-          {/* Add/Edit Crop Modal */}
-          {isDialogOpen && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
-              onClick={(e) => {
-                if (modalRef.current && !modalRef.current.contains(e.target)) {
-                  setIsDialogOpen(false);
-                }
-              }}
-            >
-              <div ref={modalRef} className="bg-white border border-green-600 p-6 rounded-2xl shadow-2xl w-[90%] max-w-md relative" onClick={(e) => e.stopPropagation()}>
-                {/* Decorative Icon */}
-                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-green-100 p-2 rounded-full shadow-md">
-                  <img src={leaf} alt="Leaf" className="w-8 h-8" />
-                </div>
-
-                <h2 className="text-2xl font-bold text-green-700 text-center mt-6 mb-4">{editCropId ? "पिक माहिती अपडेट करा" : "नवीन पीक जोडा"}</h2>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="पिकाचे नाव (Crop Name)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.name}
-                    onChange={(e) => setNewCrop({ ...newCrop, name: e.target.value })}
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="पिकाचे वर्णन (Crop Description)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.description}
-                    onChange={(e) => setNewCrop({ ...newCrop, description: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    placeholder="ॲप्लिकेशन संख्या (Weeks)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.weeks}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewCrop({
-                        ...newCrop,
-                        weeks: val === "" ? "" : Number(val),
-                      });
-                    }}
-                    required
-                  />
-                  <input
-                    type="number"
-                    placeholder="ॲप्लिकेशन दरम्यानचा कालावधी (दिवसांत)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.weekInterval}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewCrop({
-                        ...newCrop,
-                        weekInterval: val === "" ? "" : Number(val), // store interval instead of weeks
-                      });
-                    }}
-                  />
-
-                  <div className="flex justify-end space-x-3 pt-2">
-                    <button type="button" onClick={() => setIsDialogOpen(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md shadow-sm">
-                      रद्द करा
-                    </button>
-                    <button type="submit" className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-md">
-                      {editCropId ? "अपडेट करा" : "जोडा"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {isCopyDialogOpen && (
-            <div
-              className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
-              onClick={(e) => {
-                if (modalRef.current && !modalRef.current.contains(e.target)) {
-                  setIsCopyDialogOpen(false);
-                }
-              }}
-            >
-              <div ref={modalRef} className="bg-white border border-green-600 p-6 rounded-2xl shadow-2xl w-[90%] max-w-md relative" onClick={(e) => e.stopPropagation()}>
-                {/* Decorative Icon */}
-                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-green-100 p-2 rounded-full shadow-md">
-                  <img src={leaf} alt="Leaf" className="w-8 h-8" />
-                </div>
-
-                <h2 className="text-2xl font-bold text-green-700 text-center mt-6 mb-4">{"पिक माहिती अपडेट करा"}</h2>
-
-                <form onSubmit={handleSubmitCopyCrop} className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="पिकाचे नाव (Crop Name)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.name}
-                    onChange={(e) => setNewCrop({ ...newCrop, name: e.target.value })}
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="पिकाचे वर्णन (Crop Description)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.description}
-                    onChange={(e) => setNewCrop({ ...newCrop, description: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    placeholder="ॲप्लिकेशन संख्या (Weeks)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.weeks}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewCrop({
-                        ...newCrop,
-                        weeks: val === "" ? "" : Number(val),
-                      });
-                    }}
-                    required
-                  />
-                  {/* <input
-                    type="number"
-                    placeholder="ॲप्लिकेशन दरम्यानचा कालावधी (दिवसांत)"
-                    className="w-full border border-green-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    value={newCrop.weekInterval}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewCrop({
-                        ...newCrop,
-                        weekInterval: val === "" ? "" : Number(val), // store interval instead of weeks
-                      });
-                    }}
-                  /> */}
-
-                  <div className="flex justify-end space-x-3 pt-2">
-                    <button type="button" onClick={() => setIsCopyDialogOpen(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md shadow-sm">
-                      रद्द करा
-                    </button>
-                    <button type="submit" className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-md">
-                      {editCropId ? "अपडेट करा" : "जोडा"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
 
           {/* Farmer Info Modal */}
           {showModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
               <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg space-y-3">
-                <h2 className="text-lg font-semibold text-green-700">Farmer Details</h2>
+                <h2 className="text-lg font-semibold text-green-700">Enter Farmer Details</h2>
 
                 {["name", "place", "tahsil", "district", "state"].map((field) => (
                   <input
@@ -664,7 +447,6 @@ function CropList() {
                   <button onClick={() => setShowModal(false)} className="px-4 py-1.5 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                     Cancel
                   </button>
-
                   <button
                     onClick={() => {
                       handleGenerateQuotation(selectedCropId, farmerInfo);

@@ -4,15 +4,18 @@ import Navbar from "./components/Navbar";
 import AllRoutes from "./routes/AllRoutes";
 import { ToastContainer, toast } from "react-toastify";
 import Footer from "./components/Footer";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <Router>
-      <Navbar />
-      <AllRoutes />
-      <ToastContainer />
-      <Footer />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Navbar />
+        <AllRoutes />
+        <ToastContainer />
+        <Footer />
+      </Router>
+    </AuthProvider>
   );
 }
 

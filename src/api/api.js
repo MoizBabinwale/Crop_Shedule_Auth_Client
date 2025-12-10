@@ -1,7 +1,19 @@
 import axios from "axios";
 
-// const BASE_URL = "http://localhost:5000/api"; // Replace with your API base URL
-const BASE_URL = "https://crop-shedule-server.vercel.app/api"; // Replace with your API base URL
+import { BASE_URL } from "../config/baseURL.js";
+
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user"));
+
+// Attach token manually like your style
+const getAuthHeader = () => {
+  const token = localStorage.getItem("token");
+  return {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+};
 
 export const getCropData = async () => {
   try {
@@ -25,18 +37,28 @@ export const getCropById = async (cropId) => {
   }
 };
 
-export const submitData = async (cropId, shedule) => {
+export const submitData = async (cropId, schedule) => {
   try {
-    const res = await axios.post(`${BASE_URL}/schedule/create/${cropId}`, shedule);
+    const res = await axios.post(
+      `${BASE_URL}/schedule/create/${cropId}`,
+      {
+        ...schedule,
+        userId: user._id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    if (res.status === 201 || res.status === 200) {
-      return res.data;
-    }
+    return res.data;
   } catch (error) {
-    console.error("Error fetching users:", error);
-    return error;
+    console.error("Error creating schedule:", error);
+    throw error;
   }
 };
+
 export const editCropData = async (editCropId, newCrop) => {
   try {
     const res = await axios.put(`${BASE_URL}/crop/${editCropId}`, newCrop);
@@ -49,14 +71,26 @@ export const editCropData = async (editCropId, newCrop) => {
 };
 export const addCropData = async (data) => {
   try {
-    const res = await axios.post(`${BASE_URL}/crop/add`, data);
+    const res = await axios.post(
+      `${BASE_URL}/crop/add`,
+      {
+        ...data,
+        userId: user?._id, // ✅ send userId
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return res.data;
   } catch (error) {
-    console.error("Error fetching users:", error);
-    return [];
+    console.error("Error adding crop:", error);
+    throw error;
   }
 };
+
 export const deleteCropById = async (id) => {
   try {
     const res = await axios.delete(`${BASE_URL}/crop/${id}`);
@@ -116,7 +150,11 @@ export const createQuotation = async (quotationData) => {
 
 export const getAllQuotations = async () => {
   try {
-    const res = await axios.get(`${BASE_URL}/quotations`);
+    const res = await axios.get(`${BASE_URL}/quotations`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return res.data;
   } catch (error) {
@@ -146,12 +184,20 @@ export const updateQuotation = async (id, data) => {
 };
 
 export const deleteQuotation = async (id) => {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${BASE_URL}/quotations/${id}`, {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
   });
+
   if (!res.ok) throw new Error("Failed to delete quotation");
   return res.json();
 };
+
 export const getScheduleBillByScheduleId = async (scheduleId) => {
   try {
     const res = await axios.get(`${BASE_URL}/schedulebill/${scheduleId}`);
@@ -228,4 +274,30 @@ export const deleteInstruction = async (id) => {
 export const copyCrop = async (cropId, data) => {
   const res = await axios.post(`${BASE_URL}/schedule/copyCrop/${cropId}`, data);
   return res.data;
+};
+
+export const getUserQuotations = async () => {
+  const token = localStorage.getItem("token");
+  const res = await axios.get(`${BASE_URL}/quotations/user`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+// ✅ Update user profile API
+export const updateUserProfile = async (userId, data) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.put(`${BASE_URL}/auth/admin/edit/${userId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
 };

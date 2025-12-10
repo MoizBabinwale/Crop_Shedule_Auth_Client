@@ -11,7 +11,10 @@ import leaf from "../assets/Greenleaf.png";
 import { useRef } from "react";
 import { motion } from "framer-motion";
 
+import { useAuth } from "../context/AuthContext";
+
 const Home = () => {
+  const { auth } = useAuth();
   return (
     <>
       <section
@@ -32,25 +35,28 @@ const Home = () => {
         <h2 className="text-3xl md:text-4xl font-bold text-green-700 mb-8">Our Services</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-6 md:px-16">
           {[
-            { title: "Crop Schedules", desc: "Weekly guidance for your crops.", icon: "📅", to: "/croplists" },
-            { title: "Quotations", desc: "Get cost estimations instantly.", icon: "💰", to: "/quotation/master" },
+            { title: "Crop Schedules", desc: "Weekly guidance for your crops.", icon: "📅", to: "/croplists", visible: auth.user?.role !== "user" },
+            { title: "Quotations", desc: "Get cost estimations instantly.", icon: "💰", to: "/quotation/master", visible: true },
             {
               title: "About Us",
               desc: "Learn more about our mission and services for farmers.",
               icon: "ℹ️",
               to: "/about",
+              visible: true,
             },
             { title: "Products", desc: "Know exactly what your crop needs.", icon: "🌱", to: "/products" },
             // { title: "Water Management", desc: "Plan irrigation efficiently.", icon: "💧", to: "/water-management" },
-            { title: "Gallery", desc: "Awareness camps & organic farming events.", icon: "🖼️", to: "/gallery" },
+            { title: "Gallery", desc: "Awareness camps & organic farming events.", icon: "🖼️", to: "/gallery", visible: true },
             // { title: "Expert Support", desc: "Get help from agriculture experts.", icon: "👨‍🌾", to: "/support" },
-          ].map((service, index) => (
-            <Link key={index} to={service.to} className="bg-green-50 p-6 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition duration-300 block">
-              <div className="text-5xl mb-4">{service.icon}</div>
-              <h3 className="text-xl font-semibold mb-2 text-green-700">{service.title}</h3>
-              <p className="text-gray-600">{service.desc}</p>
-            </Link>
-          ))}
+          ]
+            .filter((item) => item.visible)
+            .map((service, index) => (
+              <Link key={index} to={service.to} className="bg-green-50 p-6 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition duration-300 block">
+                <div className="text-5xl mb-4">{service.icon}</div>
+                <h3 className="text-xl font-semibold mb-2 text-green-700">{service.title}</h3>
+                <p className="text-gray-600">{service.desc}</p>
+              </Link>
+            ))}
         </div>
       </section>
     </>
