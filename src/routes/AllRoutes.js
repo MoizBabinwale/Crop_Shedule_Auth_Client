@@ -102,7 +102,14 @@ const AllRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route path="/quotation/master" element={<QuotationMaster />} />
+      <Route
+        path="/quotation/master"
+        element={
+          <ProtectedRoute roles={["admin", "subadmin"]}>
+            <QuotationMaster />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/bills" element={<BillsPage />} />
 
       <Route path="/bill/:billId" element={<QuotationBill />} />

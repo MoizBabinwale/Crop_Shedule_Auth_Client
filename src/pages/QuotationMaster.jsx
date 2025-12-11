@@ -3,6 +3,7 @@ import { getAllQuotations, deleteQuotation, getUserQuotations, updateQuotation, 
 import { useNavigate } from "react-router-dom";
 import banner from "../assets/images.jpg";
 import Loading from "../components/Loading";
+import { useAuth, loading as authLoading } from "../context/AuthContext";
 
 function QuotationMaster() {
   const [quotations, setQuotations] = useState([]);
@@ -19,8 +20,8 @@ function QuotationMaster() {
   const [editId, setEditId] = useState(null);
 
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
-  const role = user?.role;
+  const { auth, authLoading } = useAuth();
+  const role = auth.user?.role;
 
   // FETCH DATA
   const fetchQuotations = async () => {
@@ -44,8 +45,10 @@ function QuotationMaster() {
   };
 
   useEffect(() => {
-    fetchQuotations();
-  }, []);
+    if (!authLoading) {
+      fetchQuotations();
+    }
+  }, [authLoading]);
 
   // DELETE
   const handleDelete = async (id) => {

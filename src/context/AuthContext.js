@@ -9,22 +9,27 @@ export function AuthProvider({ children }) {
     token: null,
   });
 
-  // load saved auth on mount
+  const [loading, setLoading] = useState(true); // ✅ IMPORTANT
+
+  // Load saved auth on mount
   useEffect(() => {
     const saved = localStorage.getItem("authState");
+
     if (saved) {
       setAuth(JSON.parse(saved));
     } else {
-      // also try the older storage keys in case you were saving token/user separately
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
+
       if (token && user) {
         setAuth({ isLoggedIn: true, token, user: JSON.parse(user) });
       }
     }
+
+    setLoading(false); // ✅ auth is now loaded
   }, []);
 
-  // persist auth
+  // Persist auth to localStorage whenever it changes
   useEffect(() => {
     if (auth.token) {
       localStorage.setItem("authState", JSON.stringify(auth));
@@ -37,23 +42,16 @@ export function AuthProvider({ children }) {
     }
   }, [auth]);
 
-  // function available to components to log in
   const loginUser = (token, user) => {
     setAuth({ isLoggedIn: true, token, user });
   };
 
-  // function to log out
   const logout = () => {
     setAuth({ isLoggedIn: false, token: null, user: null });
-    // localStorage cleared by effect, or do explicitly:
-    localStorage.removeItem("authState");
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    // window.location.reload();
+    localStorage.clear();
   };
 
-  return <AuthContext.Provider value={{ auth, loginUser, logout, setAuth }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ auth, loginUser, logout, setAuth, loading }}>{children}</AuthContext.Provider>;
 }
 
-// helper hook for easier imports
 export const useAuth = () => useContext(AuthContext);

@@ -15,11 +15,11 @@ const Navbar = () => {
   const navLinks = [
     { to: "/", label: "HOME", visible: true },
     { to: "/about", label: "ABOUT", visible: true },
-    { to: "/products", label: "PRODUCT", visible: true, visible: auth.user?.role !== "user" },
+    { to: "/products", label: "PRODUCT", visible: true, visible: auth?.user && auth.user?.role !== "user" },
 
     // 🔥 Only show for admin + subadmin
-    { to: "/quotation/master", label: "QUOTATION MASTER", visible: auth.user?.role !== "user" },
-    { to: "/quotation/createQuotation", label: "GENERATE QUOTATION ", visible: auth.user?.role === "user" },
+    { to: "/quotation/master", label: "QUOTATION MASTER", visible: auth?.user && auth.user?.role !== "user" },
+    { to: "/quotation/createQuotation", label: "GENERATE QUOTATION ", visible: auth?.user && auth.user?.role === "user" },
 
     { to: "/contact", label: "CONTACT", visible: true },
   ];

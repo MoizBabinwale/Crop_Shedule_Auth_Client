@@ -45,6 +45,7 @@ export default function AuthPage() {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         setLoading(false);
+
         if (!res.data.user.approved) {
           navigate("/pending");
           return;
@@ -54,11 +55,12 @@ export default function AuthPage() {
         else navigate("/user");
       }
     } catch (err) {
-      if (err) {
-        setLoading(false);
-        alert(err.response?.data.message ? err.response?.data.message : "Invalid login details!");
-        console.log(err);
-      }
+      setLoading(false);
+      setAlert({
+        message: err.response?.data?.message || "Invalid login details!",
+        type: "error",
+      });
+      console.log(err);
     }
   };
 
@@ -80,7 +82,10 @@ export default function AuthPage() {
     } catch (err) {
       console.log(err);
       setLoading(false);
-      alert("Registration failed!");
+      setAlert({
+        message: err.response?.data?.message || "Registration failed!",
+        type: "error",
+      });
     }
   };
 

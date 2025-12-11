@@ -3,27 +3,18 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute({ children, role, roles }) {
-  const { auth } = useAuth();
+  const { auth, loading } = useAuth();
 
-  // Not logged in
-  if (!auth.isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
+  // WAIT until auth loads
+  if (loading) return <div className="p-6 text-center">Checking access...</div>;
 
-  // Not approved
-  if (auth.user && auth.user.approved === false) {
-    return <Navigate to="/pending" replace />;
-  }
+  if (!auth.isLoggedIn) return <Navigate to="/login" replace />;
 
-  // Single role check
-  if (role && auth.user?.role !== role) {
-    return <Navigate to="/" replace />;
-  }
+  if (auth.user?.approved === false) return <Navigate to="/pending" replace />;
 
-  // Multiple roles check
-  if (roles && !roles.includes(auth.user?.role)) {
-    return <Navigate to="/" replace />;
-  }
+  if (role && auth.user?.role !== role) return <Navigate to="/" replace />;
+
+  if (roles && !roles.includes(auth.user?.role)) return <Navigate to="/" replace />;
 
   return children;
 }
