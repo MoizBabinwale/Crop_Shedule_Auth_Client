@@ -45,6 +45,9 @@ function QuotationMaster() {
   };
 
   useEffect(() => {
+    if (!auth || !auth?.user) {
+      navigate("/login");
+    }
     if (!authLoading) {
       fetchQuotations();
     }

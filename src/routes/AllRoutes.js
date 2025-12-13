@@ -105,9 +105,9 @@ const AllRoutes = () => {
       <Route
         path="/quotation/master"
         element={
-          <ProtectedRoute roles={["admin", "subadmin"]}>
-            <QuotationMaster />
-          </ProtectedRoute>
+          // <ProtectedRoute roles={["admin", "subadmin"]}>
+          <QuotationMaster />
+          // </ProtectedRoute>
         }
       />
       <Route path="/bills" element={<BillsPage />} />
