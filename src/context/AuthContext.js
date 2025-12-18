@@ -7,51 +7,70 @@ export function AuthProvider({ children }) {
     isLoggedIn: false,
     user: null,
     token: null,
+    loading: true,
   });
 
-  const [loading, setLoading] = useState(true); // ✅ IMPORTANT
-
-  // Load saved auth on mount
   useEffect(() => {
     const saved = localStorage.getItem("authState");
 
     if (saved) {
-      setAuth(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+
+      setAuth({
+        ...parsed,
+        loading: false, // ✅ ensure loading is false
+      });
     } else {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
 
       if (token && user) {
-        setAuth({ isLoggedIn: true, token, user: JSON.parse(user) });
+        setAuth({
+          isLoggedIn: true,
+          token,
+          user: JSON.parse(user),
+          loading: false,
+        });
+      } else {
+        setAuth({
+          isLoggedIn: false,
+          token: null,
+          user: null,
+          loading: false,
+        });
       }
     }
-
-    setLoading(false); // ✅ auth is now loaded
   }, []);
 
   // Persist auth to localStorage whenever it changes
   useEffect(() => {
     if (auth.token) {
-      localStorage.setItem("authState", JSON.stringify(auth));
-      localStorage.setItem("token", auth.token);
-      localStorage.setItem("user", JSON.stringify(auth.user));
+      const { loading, ...persistedAuth } = auth;
+      localStorage.setItem("authState", JSON.stringify(persistedAuth));
     } else {
       localStorage.removeItem("authState");
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
     }
   }, [auth]);
 
   const loginUser = (token, user) => {
-    setAuth({ isLoggedIn: true, token, user });
+    setAuth({
+      isLoggedIn: true,
+      token,
+      user,
+      loading: false,
+    });
   };
 
   const logout = () => {
-    setAuth({ isLoggedIn: false, token: null, user: null });
-    localStorage.clear();
+    setAuth({
+      isLoggedIn: false,
+      token: null,
+      user: null,
+      loading: false,
+    });
   };
 
-  return <AuthContext.Provider value={{ auth, loginUser, logout, setAuth, loading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ auth, loginUser, logout, setAuth }}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);

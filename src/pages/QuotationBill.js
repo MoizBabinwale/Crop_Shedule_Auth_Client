@@ -12,7 +12,6 @@ const QuotationBill = () => {
   useEffect(() => {
     const fetchBill = async () => {
       const data = await getQuotationBillById(quotationId);
-      console.log("data ", data);
 
       setBillData(data);
     };

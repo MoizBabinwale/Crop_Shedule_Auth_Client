@@ -47,21 +47,9 @@ function CropList() {
   const fetchCrops = async () => {
     const res = await getCropData();
     if (res.data) {
-      const cropsWithBillStatus = await Promise.all(
-        res.data.map(async (crop) => {
-          try {
-            const schedule = await getSchedulesByCropId(crop._id); // Assuming one schedule per crop
-            if (schedule && schedule.scheduleBillId) {
-              return { ...crop, scheduleId: schedule._id, hasBill: true };
-            }
-          } catch (err) {
-            console.error("Error fetching schedule for crop", crop._id, err);
-          }
-          return { ...crop, hasBill: false };
-        })
-      );
+      console.log("res.data ", res.data);
 
-      setCropList(cropsWithBillStatus);
+      setCropList(res.data);
       setLoading(false);
     } else {
       toast.warning("Unable to fetch Data!", {

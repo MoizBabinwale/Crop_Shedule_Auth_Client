@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { loginUser, registerUser } from "../api/authapi";
 import { useNavigate } from "react-router-dom";
+import CommonAlert from "../components/CommonAlert";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -10,6 +11,11 @@ export default function AuthPage() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const [alert, setAlert] = useState({
+    message: "",
+    type: "success",
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +30,12 @@ export default function AuthPage() {
     } else {
       const res = await registerUser(form);
       if (res?.data?.success) {
-        alert("Registration successful! Wait for admin approval.");
+        // alert("Registration successful! Wait for admin approval.");
+
+        setAlert({
+          message: "Registration successful! Wait for admin approval.",
+          type: "info",
+        });
         setIsLogin(true);
       }
     }
@@ -117,6 +128,7 @@ export function AdminDashboard() {
           ))}
         </tbody>
       </table>
+      <CommonAlert message={alert.message} type={alert.type} onClose={() => setAlert({ ...alert, message: "" })} />
     </div>
   );
 }

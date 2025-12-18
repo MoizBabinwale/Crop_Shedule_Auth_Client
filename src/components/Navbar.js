@@ -3,13 +3,16 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import logo from "../assets/logo.jpg";
 import { useAuth } from "../context/AuthContext";
+import { Bell } from "lucide-react";
+
+import { useNotifications } from "../context/NotificationContext";
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const { logout, auth, loginUser } = useAuth();
+  const { logout, auth } = useAuth();
   const token = localStorage.getItem("token"); // check login
 
   const navLinks = [
@@ -38,6 +41,13 @@ const Navbar = () => {
     }
     setProfileOpen(false);
   };
+
+  const { notifications } = useNotifications();
+
+  // ✅ NOW THIS MAKES SENSE
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const showBell = !auth.loading && auth.isLoggedIn && (auth.user?.role === "admin" || auth.user?.role === "subadmin");
 
   return (
     <nav className="bg-[#3BB149] text-white print:hidden">
@@ -77,25 +87,34 @@ const Navbar = () => {
             {/* ✅ LOGIN / LOGOUT BUTTON */}
             {/* PROFILE + LOGOUT DROPDOWN */}
             {auth.isLoggedIn ? (
-              <div className="relative">
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="w-10 h-10 rounded-full bg-white text-[#3BB149] font-bold flex items-center justify-center text-lg border-2 border-white hover:bg-[#FFA534] hover:text-white transition"
-                >
+              <div className="relative" onMouseEnter={() => setProfileOpen(true)} onMouseLeave={() => setProfileOpen(false)}>
+                <button className="w-10 h-10 rounded-full bg-white text-[#3BB149] font-bold flex items-center justify-center text-lg border-2 border-white hover:bg-[#FFA534] hover:text-white transition">
                   {firstLetter}
                 </button>
 
-                {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg py-2 z-50">
+                <div
+                  className={`absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg py-2 z-50
+      transition-all duration-200 ease-out
+      ${profileOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible"}
+    `}
+                >
+                  <div className="flex p-2">
                     <button onClick={goToDashboard} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
                       Profile
                     </button>
+                    {showBell && (
+                      <button onClick={() => navigate("/notifications")} className="pr-1 relative p-2 rounded-full hover:bg-green-100">
+                        <Bell className="text-green-700" />
 
-                    <button onClick={logout} className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500">
-                      Logout
-                    </button>
+                        {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">{unreadCount}</span>}
+                      </button>
+                    )}
                   </div>
-                )}
+
+                  <button onClick={logout} className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500">
+                    Logout
+                  </button>
+                </div>
               </div>
             ) : (
               <div>

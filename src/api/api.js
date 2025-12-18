@@ -221,8 +221,6 @@ export const createScheduleBill = async (payload) => {
 };
 export const createQuotationBill = async (quotationId, totalAcres) => {
   try {
-    console.log("generatign..");
-
     // Step 1: Fetch Quotation (you might already have it in frontend, or fetch if needed)
     const quotationBillRes = await axios.post(`${BASE_URL}/quotationbills/${quotationId}/${totalAcres}`);
     return quotationBillRes.data;
@@ -300,4 +298,67 @@ export const updateUserProfile = async (userId, data) => {
     console.error("Error updating profile:", error);
     throw error;
   }
+};
+
+export const submitContactMessage = async (data) => {
+  const token = localStorage.getItem("token");
+
+  const res = await axios.post(`${BASE_URL}/notifications/contact`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Get all notifications
+export const getNotifications = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const res = await axios.get(BASE_URL + "/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return res.data;
+    }
+  } catch (error) {
+    console.error("Error fetching notifications", error);
+    throw error;
+  }
+};
+
+// Mark notification as read
+export const markNotificationRead = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.put(
+      BASE_URL + `/notifications/${id}/read`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    console.error("Error marking notification as read", error);
+    throw error;
+  }
+};
+
+export const getContactMessageById = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const res = await axios.get(BASE_URL + `/notifications/message/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
 };

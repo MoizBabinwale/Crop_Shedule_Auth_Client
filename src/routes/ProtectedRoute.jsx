@@ -3,10 +3,10 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute({ children, role, roles }) {
-  const { auth, loading } = useAuth();
+  const { auth } = useAuth();
 
   // WAIT until auth loads
-  if (loading) return <div className="p-6 text-center">Checking access...</div>;
+  if (auth.loading) return <div className="p-6 text-center">Checking access...</div>;
 
   if (!auth.isLoggedIn) return <Navigate to="/login" replace />;
 

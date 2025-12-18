@@ -5,13 +5,16 @@ import AllRoutes from "./routes/AllRoutes";
 import { ToastContainer, toast } from "react-toastify";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <Navbar />
-        <AllRoutes />
+        <NotificationProvider>
+          <Navbar />
+          <AllRoutes />
+        </NotificationProvider>
         <ToastContainer />
         <Footer />
       </Router>

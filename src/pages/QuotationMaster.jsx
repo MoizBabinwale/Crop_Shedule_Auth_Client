@@ -1,70 +1,99 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getAllQuotations, deleteQuotation, getUserQuotations, updateQuotation, getQuotationById } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import banner from "../assets/images.jpg";
 import Loading from "../components/Loading";
-import { useAuth, loading as authLoading } from "../context/AuthContext";
+import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import CommonAlert from "../components/CommonAlert";
+import { useAuth } from "../context/AuthContext";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 function QuotationMaster() {
+  const navigate = useNavigate();
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteCropName, setDeleteCropName] = useState("");
+  // const user = JSON.parse(localStorage.getItem("user"));
+  // const role = user?.role;
+
+  const { auth, loading: authLoading } = useAuth();
+
+  const role = auth.user?.role;
+
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // EDIT MODAL STATE
+  // Alert
+  const [alert, setAlert] = useState({ message: "", type: "success" });
+
+  // Edit Modal
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({
     cropName: "",
     acres: "",
     farmerInfo: { name: "", place: "" },
   });
-  const [editId, setEditId] = useState(null);
 
-  const navigate = useNavigate();
-  const { auth, authLoading } = useAuth();
-  const role = auth.user?.role;
+  const ITEMS_PER_PAGE = 50;
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // FETCH DATA
-  const fetchQuotations = async () => {
+  /* ---------------- FETCH QUOTATIONS ---------------- */
+  const fetchQuotations = useCallback(async () => {
     try {
       setLoading(true);
-      let res;
+      const res = role === "admin" || role === "subadmin" ? await getAllQuotations() : await getUserQuotations();
 
-      if (role === "admin" || role === "subadmin") {
-        res = await getAllQuotations();
-      } else {
-        res = await getUserQuotations();
-      }
-
-      if (res.length > 0) setQuotations(res);
-      setLoading(false);
+      setQuotations(res || []);
     } catch (err) {
-      console.error("Failed to fetch quotations", err);
+      console.error(err);
+      setAlert({ message: "Failed to load quotations ❌", type: "error" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [role]);
 
   useEffect(() => {
-    if (!auth || !auth?.user) {
-      navigate("/login");
-    }
-    if (!authLoading) {
+    if (!authLoading && role) {
       fetchQuotations();
     }
-  }, [authLoading]);
+  }, [authLoading, role, fetchQuotations]);
+  /* ---------------- DELETE ---------------- */
+  const handleDelete = async () => {
+    try {
+      await deleteQuotation(deleteId);
 
-  // DELETE
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this quotation?")) return;
+      setAlert({
+        message: `Quotation "${deleteCropName}" deleted successfully ✅`,
+        type: "success",
+      });
 
-    await deleteQuotation(id);
-    fetchQuotations();
+      fetchQuotations();
+      if ((currentPage - 1) * ITEMS_PER_PAGE >= filteredQuotations.length - 1) {
+        setCurrentPage((p) => Math.max(p - 1, 1));
+      }
+    } catch (err) {
+      console.error(err);
+      setAlert({ message: "Failed to delete quotation ❌", type: "error" });
+    } finally {
+      setConfirmOpen(false);
+      setDeleteId(null);
+      setDeleteCropName("");
+    }
   };
 
-  // VIEW
+  const openDeleteConfirm = (id, cropName) => {
+    setDeleteId(id);
+    setDeleteCropName(cropName);
+    setConfirmOpen(true);
+  };
+
+  /* ---------------- VIEW ---------------- */
   const handleView = (id) => navigate(`/schedule/quotation/${id}`);
 
-  // EDIT (OPEN MODAL)
+  /* ---------------- EDIT ---------------- */
   const handleEdit = async (id) => {
     try {
       const res = await getQuotationById(id);
@@ -72,18 +101,19 @@ function QuotationMaster() {
       setEditData(res);
       setEditModalOpen(true);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
-  // EDIT (SAVE TO BACKEND)
   const saveEdit = async () => {
     try {
       await updateQuotation(editId, editData);
       setEditModalOpen(false);
       fetchQuotations();
+      setAlert({ message: "Quotation updated successfully ✅", type: "success" });
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      setAlert({ message: "Update failed ❌", type: "error" });
     }
   };
 
@@ -95,6 +125,11 @@ function QuotationMaster() {
           return q.cropName?.toLowerCase().includes(s) || q.farmerInfo?.name?.toLowerCase().includes(s) || q.farmerInfo?.place?.toLowerCase().includes(s);
         })
       : quotations;
+
+  // PAGINATION LOGIC
+  const totalPages = Math.ceil(filteredQuotations.length / ITEMS_PER_PAGE);
+
+  const paginatedQuotations = filteredQuotations.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -141,30 +176,31 @@ function QuotationMaster() {
 
               <tbody>
                 {filteredQuotations.length > 0 ? (
-                  filteredQuotations.map((q, index) => (
+                  paginatedQuotations.map((q, index) => (
                     <tr key={q._id} className="border-b hover:bg-gray-100 transition">
-                      <td className="p-3">{index + 1}</td>
+                      <td className="p-3">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
+
                       <td className="p-3 font-medium">{q.cropName}</td>
                       <td className="p-3 font-medium">{q.farmerInfo.name}</td>
                       <td className="p-3 font-medium">{q.farmerInfo.place}</td>
                       <td className="p-3">{q.acres}</td>
                       <td className="p-3">{new Date(q.createdAt).toLocaleDateString()}</td>
 
-                      <td className="p-3 flex gap-3">
+                      <td className="p-3 flex gap-4 items-center">
                         {/* VIEW */}
-                        <button onClick={() => handleView(q._id)} className="text-blue-600 hover:underline">
-                          View
+                        <button onClick={() => handleView(q._id)} className="text-blue-600 hover:text-blue-800" title="View">
+                          <FaEye size={18} />
                         </button>
 
-                        {/* ADMIN ONLY */}
+                        {/* ADMIN / SUBADMIN */}
                         {(role === "admin" || role === "subadmin") && (
                           <>
-                            <button onClick={() => handleEdit(q._id)} className="text-green-600 hover:underline">
-                              Edit
+                            <button onClick={() => handleEdit(q._id)} className="text-green-600 hover:text-green-800" title="Edit">
+                              <FaEdit size={18} />
                             </button>
 
-                            <button onClick={() => handleDelete(q._id)} className="text-red-600 hover:underline">
-                              Delete
+                            <button onClick={() => openDeleteConfirm(q._id, q.cropName)} className="text-red-600 hover:text-red-800" title="Delete">
+                              <FaTrash size={18} />
                             </button>
                           </>
                         )}
@@ -180,6 +216,24 @@ function QuotationMaster() {
                 )}
               </tbody>
             </table>
+            {/* PAGINATION */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
+                <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)} className="px-4 py-2 rounded bg-gray-300 disabled:opacity-50">
+                  Prev
+                </button>
+
+                {[...Array(totalPages)].map((_, i) => (
+                  <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-4 py-2 rounded ${currentPage === i + 1 ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`}>
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)} className="px-4 py-2 rounded bg-gray-300 disabled:opacity-50">
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -221,6 +275,17 @@ function QuotationMaster() {
           </div>
         </div>
       )}
+
+      <CommonAlert message={alert.message} type={alert.type} onClose={() => setAlert({ message: "", type: "success" })} />
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Delete Quotation"
+        message={`Do you really want to delete "${deleteCropName}" quotation?`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

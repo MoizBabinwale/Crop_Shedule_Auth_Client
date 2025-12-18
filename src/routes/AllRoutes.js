@@ -19,6 +19,7 @@ import UserDashboard from "../pages/UserDashboard.jsx";
 import AdminDashboard from "../pages/adminDashboard.jsx";
 import AuthPage from "../pages/AuthPage.jsx";
 import CreateQuotation from "../pages/CreateQuotation.js";
+import Notification from "../pages/Notifications.jsx";
 import PublicRoute from "./PublicRoute.jsx";
 
 const AllRoutes = () => {
@@ -105,9 +106,9 @@ const AllRoutes = () => {
       <Route
         path="/quotation/master"
         element={
-          // <ProtectedRoute roles={["admin", "subadmin"]}>
-          <QuotationMaster />
-          // </ProtectedRoute>
+          <ProtectedRoute roles={["admin", "subadmin"]}>
+            <QuotationMaster />
+          </ProtectedRoute>
         }
       />
       <Route path="/bills" element={<BillsPage />} />
@@ -117,6 +118,15 @@ const AllRoutes = () => {
       <Route path="/scheduleBill/view/:scheduleId" element={<ScheduleBillView />} />
       <Route path="/quotationBill/view/:quotationId" element={<QuotationBill />} />
       <Route path="/gallery" element={<GalleryPage />} />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute roles={["admin", "subadmin"]}>
+            {" "}
+            <Notification />
+          </ProtectedRoute>
+        }
+      />
 
       {/* MUST BE LAST */}
       <Route path="*" element={<AuthPage />} />
