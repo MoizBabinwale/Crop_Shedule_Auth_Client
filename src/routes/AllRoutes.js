@@ -84,7 +84,15 @@ const AllRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route path="/schedule/quotation/:quatationId" element={<QuatationGen />} />
+      <Route
+        path="/schedule/quotation/:quatationId"
+        element={
+          <ProtectedRoute roles={["admin", "subadmin"]}>
+            {" "}
+            <QuatationGen />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/croplists"
