@@ -11,7 +11,7 @@ export function AuthProvider({ children }) {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem("authState");
+    const saved = sessionStorage.getItem("authState");
 
     if (saved) {
       const parsed = JSON.parse(saved);
@@ -21,8 +21,8 @@ export function AuthProvider({ children }) {
         loading: false, // ✅ ensure loading is false
       });
     } else {
-      const token = localStorage.getItem("token");
-      const user = localStorage.getItem("user");
+      const token = sessionStorage.getItem("token");
+      const user = sessionStorage.getItem("user");
 
       if (token && user) {
         setAuth({
@@ -42,13 +42,15 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Persist auth to localStorage whenever it changes
+  // Persist auth to sessionStorage whenever it changes
   useEffect(() => {
     if (auth.token) {
       const { loading, ...persistedAuth } = auth;
-      localStorage.setItem("authState", JSON.stringify(persistedAuth));
+      sessionStorage.setItem("authState", JSON.stringify(persistedAuth));
     } else {
-      localStorage.removeItem("authState");
+      sessionStorage.removeItem("authState");
+      // sessionStorage.removeItem("token");
+      // sessionStorage.removeItem("user");
     }
   }, [auth]);
 

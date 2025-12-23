@@ -202,7 +202,7 @@ function CropList() {
   const handleGenerateQuotation = async (cropId, farmerData) => {
     setLoading(true);
     try {
-      const loggedInUser = JSON.parse(localStorage.getItem("user"));
+      const loggedInUser = JSON.parse(sessionStorage.getItem("user"));
 
       farmerData = {
         ...farmerInfo,

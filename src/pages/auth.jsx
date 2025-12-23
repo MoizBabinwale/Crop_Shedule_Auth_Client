@@ -23,8 +23,8 @@ export default function AuthPage() {
     if (isLogin) {
       const res = await loginUser({ email: form.email, password: form.password });
       if (res?.data?.success) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        sessionStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("user", JSON.stringify(res.data.user));
         navigate("/dashboard");
       }
     } else {

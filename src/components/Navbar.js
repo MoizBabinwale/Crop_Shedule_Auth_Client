@@ -13,7 +13,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { logout, auth } = useAuth();
-  const token = localStorage.getItem("token"); // check login
+  const token = sessionStorage.getItem("token"); // check login
 
   const navLinks = [
     { to: "/", label: "HOME", visible: true },

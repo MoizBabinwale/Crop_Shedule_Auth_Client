@@ -308,20 +308,37 @@ function CropList() {
 
   const [sortBy, setSortBy] = useState("createdAt"); // default sort by name
 
-  const sortedCropList = [...cropList]
+  const sortedCropList = cropList
+    // 🔹 search filter
+    .filter((crop) => crop.name.toLowerCase().includes(searchTerm.toLowerCase()))
+
+    // 🔹 unapproved filter
+    .filter((crop) => {
+      if (sortBy === "unapproved") {
+        return crop.approved === false;
+      }
+      return true;
+    })
+
+    // 🔹 sorting
     .sort((a, b) => {
       if (sortBy === "name") return a.name.localeCompare(b.name);
       if (sortBy === "weeks") return a.weeks - b.weeks;
       if (sortBy === "createdAt") return new Date(b.createdAt) - new Date(a.createdAt);
+
+      // for unapproved, keep newest first
+      if (sortBy === "unapproved") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+
       return 0;
-    })
-    .filter((crop) => crop.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    });
 
   const [userData, setUserData] = useState(null);
 
   // Load logged in user
   useEffect(() => {
-    const loggedInUser = JSON.parse(localStorage.getItem("user"));
+    const loggedInUser = JSON.parse(sessionStorage.getItem("user"));
     setUserData(loggedInUser);
 
     if (loggedInUser) {
@@ -359,9 +376,10 @@ function CropList() {
 
               {/* 🔽 Sort Dropdown */}
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border border-green-300 rounded-lg p-2 text-sm text-green-700">
+                <option value="createdAt">Sort by Date (Newest)</option>
                 <option value="name">Sort by Name</option>
                 <option value="weeks">Sort by Weeks</option>
-                <option value="createdAt">Sort by Date (Newest)</option>
+                <option value="unapproved">Unapproved Schedules</option>
               </select>
 
               {/* ➕ Add Button */}

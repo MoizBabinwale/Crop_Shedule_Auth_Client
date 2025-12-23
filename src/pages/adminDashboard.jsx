@@ -4,6 +4,9 @@ import { BASE_URL } from "../config/baseURL";
 import { useNavigate } from "react-router-dom";
 import { FaPencil } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
+import { FaCheck, FaTrash, FaEdit } from "react-icons/fa";
+import CommonAlert from "../components/CommonAlert";
+import { updateProfile } from "../api/api";
 
 export default function AdminDashboard() {
   const { auth, setAuth } = useAuth();
@@ -19,7 +22,14 @@ export default function AdminDashboard() {
     state: "",
   });
 
-  const token = localStorage.getItem("token");
+  const [alert, setAlert] = useState({
+    message: "",
+    type: "success",
+  });
+
+  const token = sessionStorage.getItem("token");
+
+  const currentRole = auth?.user?.role; // "admin" | "subadmin"
 
   // Fetch all users
   const getAllUsers = async () => {
@@ -68,7 +78,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     getAllUsers();
 
-    const loggedInUser = JSON.parse(localStorage.getItem("user"));
+    const loggedInUser = JSON.parse(sessionStorage.getItem("user"));
     setCurrentAdmin(loggedInUser);
 
     if (loggedInUser) {
@@ -87,7 +97,7 @@ export default function AdminDashboard() {
 
       const updatedUser = { ...auth.user, ...form };
 
-      // ✅ update context (this auto updates localStorage through useEffect)
+      // ✅ update context (this auto updates sessionStorage through useEffect)
       setAuth({
         ...auth,
         user: updatedUser,
@@ -98,6 +108,73 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Update error:", error);
     }
+  };
+
+  const [editUserModal, setEditUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    number: "",
+    role: "user",
+    approved: false,
+    place: "",
+    tahsil: "",
+    district: "",
+    state: "",
+  });
+
+  const updateUserDetails = async () => {
+    try {
+      const res = await updateProfile(editForm, selectedUser._id);
+      if (res) {
+        setAlert({
+          message: "User Updated Successfully!",
+          type: "success",
+        });
+        setEditUserModal(false);
+        getAllUsers();
+      }
+    } catch (error) {
+      console.error("Update user error:", error);
+    }
+  };
+
+  const openEditUserModal = (user) => {
+    setSelectedUser(user);
+    setEditForm({
+      name: user.name || "",
+      email: user.email || "",
+      number: user.number || "",
+      role: user.role || "user",
+      approved: user.approved || false,
+      place: user.place || "",
+      tahsil: user.tahsil || "",
+      district: user.district || "",
+      state: user.state || "",
+    });
+    setEditUserModal(true);
+  };
+
+  const isAdmin = currentRole === "admin";
+  const isSubAdmin = currentRole === "subadmin";
+
+  const canEditUser = (user) => {
+    if (isAdmin) return true;
+    if (isSubAdmin && user.role !== "admin") return true;
+    return false;
+  };
+
+  const canDeleteUser = (user) => {
+    if (isAdmin) return true;
+    if (isSubAdmin && user.role !== "admin") return true;
+    return false;
+  };
+
+  const canChangeRole = (user) => {
+    if (isAdmin) return true;
+    if (isSubAdmin && user.role !== "admin") return true;
+    return false;
   };
 
   return (
@@ -177,25 +254,39 @@ export default function AdminDashboard() {
                         <td className="p-3 capitalize">{u.role}</td>
                         <td className="p-3">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
 
-                        <td className="p-3 flex flex-col gap-2 items-center">
-                          {/* Approve Button */}
-                          {!u.approved && (
-                            <button onClick={() => approveUser(u._id)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded-lg w-32">
-                              Approve
-                            </button>
-                          )}
+                        <td className="p-3 whitespace-nowrap">
+                          <div className="flex flex-nowrap items-center justify-start gap-2">
+                            {/* Role Select */}
+                            {canChangeRole(u) && (
+                              <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm w-24">
+                                <option value="user">User</option>
+                                <option value="subadmin">Sub Admin</option>
 
-                          {/* Change Role */}
-                          <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-3 py-1 rounded-lg text-sm w-32">
-                            <option value="user">User</option>
-                            <option value="subadmin">Sub Admin</option>
-                            <option value="admin">Admin</option>
-                          </select>
+                                {isAdmin && <option value="admin">Admin</option>}
+                              </select>
+                            )}
 
-                          {/* Delete Button */}
-                          <button onClick={() => deleteUser(u._id)} className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg w-32">
-                            Delete
-                          </button>
+                            {/* Edit */}
+                            {canEditUser(u) && (
+                              <button onClick={() => openEditUserModal(u)} title="Edit User" className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full">
+                                <FaEdit size={14} />
+                              </button>
+                            )}
+
+                            {/* Delete */}
+                            {canDeleteUser(u) && (
+                              <button onClick={() => deleteUser(u._id)} title="Delete User" className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full">
+                                <FaTrash size={14} />
+                              </button>
+                            )}
+
+                            {/* Approve */}
+                            {!u.approved && u.role !== "admin" && (
+                              <button onClick={() => approveUser(u._id)} title="Approve User" className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full">
+                                <FaCheck size={14} />
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -243,6 +334,55 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {editUserModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-3xl shadow-xl">
+            <h2 className="text-2xl font-bold text-green-700 mb-6">Edit User Details</h2>
+
+            {/* FORM GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <input placeholder="Full Name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="p-2 border rounded" />
+
+              <input placeholder="Email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="p-2 border rounded" />
+
+              <input placeholder="Mobile Number" value={editForm.number} onChange={(e) => setEditForm({ ...editForm, number: e.target.value })} className="p-2 border rounded" />
+
+              <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className="p-2 border rounded">
+                <option value="user">User</option>
+                <option value="subadmin">Sub Admin</option>
+                <option value="admin">Admin</option>
+              </select>
+
+              <select value={editForm.approved} onChange={(e) => setEditForm({ ...editForm, approved: e.target.value === "true" })} className="p-2 border rounded">
+                <option value="true">Approved</option>
+                <option value="false">Pending</option>
+              </select>
+
+              <input placeholder="Place" value={editForm.place} onChange={(e) => setEditForm({ ...editForm, place: e.target.value })} className="p-2 border rounded" />
+
+              <input placeholder="Tahsil" value={editForm.tahsil} onChange={(e) => setEditForm({ ...editForm, tahsil: e.target.value })} className="p-2 border rounded" />
+
+              <input placeholder="District" value={editForm.district} onChange={(e) => setEditForm({ ...editForm, district: e.target.value })} className="p-2 border rounded" />
+
+              <input placeholder="State" value={editForm.state} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} className="p-2 border rounded" />
+            </div>
+
+            {/* ACTIONS */}
+            <div className="flex justify-end gap-4 mt-6">
+              <button onClick={() => setEditUserModal(false)} className="px-5 py-2 bg-gray-400 text-white rounded-lg">
+                Cancel
+              </button>
+
+              <button onClick={updateUserDetails} className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CommonAlert message={alert.message} type={alert.type} onClose={() => setAlert({ ...alert, message: "" })} />
     </div>
   );
 }

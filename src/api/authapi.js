@@ -3,7 +3,7 @@ import { BASE_URL } from "../config/baseURL";
 
 // Attach token manually like your style
 const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   return {
     headers: {
       Authorization: token ? `Bearer ${token}` : "",

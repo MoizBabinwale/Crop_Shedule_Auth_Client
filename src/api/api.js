@@ -2,12 +2,12 @@ import axios from "axios";
 
 import { BASE_URL } from "../config/baseURL.js";
 
-const token = localStorage.getItem("token");
-const user = JSON.parse(localStorage.getItem("user"));
+const token = sessionStorage.getItem("token");
+const user = JSON.parse(sessionStorage.getItem("user"));
 
 // Attach token manually like your style
 const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   return {
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
@@ -184,7 +184,7 @@ export const updateQuotation = async (id, data) => {
 };
 
 export const deleteQuotation = async (id) => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const res = await fetch(`${BASE_URL}/quotations/${id}`, {
     method: "DELETE",
@@ -275,7 +275,7 @@ export const copyCrop = async (cropId, data) => {
 };
 
 export const getUserQuotations = async () => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const res = await axios.get(`${BASE_URL}/quotations/user`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -285,7 +285,7 @@ export const getUserQuotations = async () => {
 // ✅ Update user profile API
 export const updateUserProfile = async (userId, data) => {
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     const res = await axios.put(`${BASE_URL}/auth/admin/edit/${userId}`, data, {
       headers: {
@@ -301,7 +301,7 @@ export const updateUserProfile = async (userId, data) => {
 };
 
 export const submitContactMessage = async (data) => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const res = await axios.post(`${BASE_URL}/notifications/contact`, data, {
     headers: { Authorization: `Bearer ${token}` },
@@ -313,7 +313,7 @@ export const submitContactMessage = async (data) => {
 // Get all notifications
 export const getNotifications = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       const res = await axios.get(BASE_URL + "/notifications", {
         headers: {
@@ -332,7 +332,7 @@ export const getNotifications = async () => {
 // Mark notification as read
 export const markNotificationRead = async (id) => {
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     const res = await axios.put(
       BASE_URL + `/notifications/${id}/read`,
@@ -352,7 +352,7 @@ export const markNotificationRead = async (id) => {
 };
 
 export const getContactMessageById = async (id) => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const res = await axios.get(BASE_URL + `/notifications/message/${id}`, {
     headers: {
@@ -360,5 +360,23 @@ export const getContactMessageById = async (id) => {
     },
   });
 
+  return res.data;
+};
+
+export const approveSchedule = (scheduleId) => {
+  return axios.put(
+    `${BASE_URL}/schedule/approve/${scheduleId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+export const updateProfile = async (userData, userId) => {
+  const res = await axios.put(`${BASE_URL}/auth/admin/edit-user/${userId}`, userData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return res.data;
 };

@@ -49,7 +49,7 @@ const AllRoutes = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute role="admin">
+          <ProtectedRoute roles={["admin", "subadmin"]}>
             <AdminDashboard />
           </ProtectedRoute>
         }

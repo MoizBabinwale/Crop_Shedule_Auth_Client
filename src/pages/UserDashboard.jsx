@@ -23,7 +23,7 @@ export default function UserDashboard() {
   });
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) return navigate("/login");
 
     const parsedUser = JSON.parse(userData);
@@ -50,7 +50,7 @@ export default function UserDashboard() {
 
       const updatedUser = { ...auth.user, ...detailform };
 
-      // ✅ Update context (this also syncs localStorage)
+      // ✅ Update context (this also syncs sessionStorage)
       setAuth({ ...auth, user: updatedUser });
 
       setUser(updatedUser);

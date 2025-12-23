@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { addInstruction, deleteInstruction, editInstruction, getCropById, getInstructions, getProductList, getSchedulesByCropId, submitData } from "../api/api";
+import { addInstruction, approveSchedule, deleteInstruction, editInstruction, getCropById, getInstructions, getProductList, getSchedulesByCropId, submitData } from "../api/api";
 import { useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -17,6 +17,7 @@ const Form1 = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [weekForms, setWeekForms] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [approvedStatus, setApprovedStatus] = useState(false);
   const [totalPlants, setTotalPlants] = useState(0);
 
   const queryParams = new URLSearchParams(location.search);
@@ -270,13 +271,16 @@ const Form1 = () => {
       fetchSchedule();
       getCropDataById(cropId);
     }
-  }, [cropId, productsLoaded]);
+  }, [cropId, productsLoaded, approvedStatus]);
 
   const fetchSchedule = async () => {
     try {
       setLoading(true);
       const res = await getSchedulesByCropId(cropId);
-
+      if (res) {
+        console.log("res ", res);
+        setApprovedStatus(res?.approved);
+      }
       if (res && res.weeks?.length > 0) {
         const formattedWeeks = res.weeks.map((week) => {
           const productsObject = {};
@@ -421,6 +425,19 @@ const Form1 = () => {
     // fetchInstructions()
   };
 
+  const handleApprove = async () => {
+    try {
+      const res = await approveSchedule(scheduleId);
+      console.log("hitted ", res);
+      if (res.status === 200) {
+        setApprovedStatus(res?.data?.approved);
+      }
+      // window.location.reload();
+    } catch (error) {
+      console.error("Approval failed", error);
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -433,18 +450,29 @@ const Form1 = () => {
             </div>
 
             <div className="bg-white rounded-lg p-4 shadow-inner max-w-xl mx-auto mt-4 text-gray-800">
-              <p className="mb-2">
-                <span className="font-semibold text-green-700">🌾 पिकाचे नाव:</span> {name}
-              </p>
-              <p className="mb-2">
-                <span className="font-semibold text-green-700">📅 एकूण आठवडे:</span> {weeks}
-              </p>
-              <p className="mb-2">
-                <span className="font-semibold text-green-700">📅 एकूण एकड :</span> 1
-              </p>
-              <p>
-                <span className="font-semibold text-green-700"> 🧾शेड्यूल बिल:</span> {isBillReady ? <>तयार आहे</> : <>तयार नाही</>}
-              </p>
+              <div className="flex justify-between">
+                <div>
+                  <p className="mb-2">
+                    <span className="font-semibold text-green-700">🌾 पिकाचे नाव:</span> {name}
+                  </p>
+                  <p className="mb-2">
+                    <span className="font-semibold text-green-700">📅 एकूण आठवडे:</span> {weeks}
+                  </p>
+                  <p className="mb-2">
+                    <span className="font-semibold text-green-700">📅 एकूण एकड :</span> 1
+                  </p>
+                  <p>
+                    <span className="font-semibold text-green-700"> 🧾शेड्यूल बिल:</span> {isBillReady ? <>तयार आहे</> : <>तयार नाही</>}
+                  </p>
+                </div>
+                {!approvedStatus && (
+                  <div>
+                    <button onClick={handleApprove} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                      Approve Schedule
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="mt-3">
                 <label>Total Plants (7 Feet x5 Feet)</label>
                 <input

@@ -42,8 +42,8 @@ export default function AuthPage() {
 
       if (res.data) {
         loginUser(res.data.token, res.data.user);
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        sessionStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("user", JSON.stringify(res.data.user));
         setLoading(false);
 
         if (!res.data.user.approved) {
