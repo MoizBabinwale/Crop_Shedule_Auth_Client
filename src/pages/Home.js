@@ -25,7 +25,7 @@ const Home = () => {
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="relative text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">🌾 Parnanetra Ayurvedic</h1>
-          <p className="text-lg md:text-xl mb-6">शेतकऱ्यांसाठी आधुनिक उपाय — पीक वेळापत्रक, कोटेशन आणि आणखी बरेच काही.</p>
+          <p className="text-lg md:text-2xl mb-6">शेतकऱ्यांसाठी आधुनिक उपाय — Since 1988 ...Parnanetra Sanshodhanalay is working in the field of Organic Agriculture.</p>
           {/* <button className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg shadow-lg transition duration-300">Get Started</button> */}
         </div>
       </section>

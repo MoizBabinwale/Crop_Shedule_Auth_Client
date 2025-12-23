@@ -1,42 +1,52 @@
 import { useEffect } from "react";
-
+import Aboutimage from "../assets/aboutpage.jpg";
 const About = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
 
   return (
-    <div className="w-full pt-5 bg-white mb-5">
-      <div className="max-w-7xl mx-auto px-4 ">
-        <div className="flex flex-col lg:flex-row gap-5">
+    <div className="w-full pt-10 bg-white pb-10">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-col lg:flex-row gap-10 items-center">
           {/* Left Image Section */}
-          <div className="lg:w-1/2 mb-5 lg:mb-0">
-            <div className="flex h-full border-4 border-green-600 pt-4">
-              <img className="object-contain h-auto mt-auto mx-auto" src="https://demo.htmlcodex.com/1670/organic-farm-website-template/img/about.png" alt="About" />
+          <div className="lg:w-1/2">
+            <div className="border-4 border-green-600 rounded-xl p-4">
+              <img className="w-full h-auto object-cover rounded-lg" src={Aboutimage} alt="Organic Farming" />
             </div>
           </div>
 
-          {/* Right Text Section */}
-          <div className="lg:w-1/2 pb-5">
-            <div className="mb-3 pb-2">
-              <h6 className="text-green-600 uppercase font-semibold text-sm">About Us</h6>
-              <h1 className="text-4xl font-bold text-gray-800">We Produce Organic Food For Your Family</h1>
-            </div>
-            <p className="mb-4 text-gray-600">
-              Tempor erat elitr at rebum at at clita. Diam dolor diam ipsum et tempor sit. Clita erat ipsum et lorem et sit, sed stet no labore lorem sit. Sanctus clita duo justo et tempor eirmod
-              magna dolore erat amet magna
+          {/* Right Content Section */}
+          <div className="lg:w-1/2">
+            <h6 className="text-green-600 uppercase font-semibold text-sm mb-2">About Us</h6>
+
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">Parnanetra Ayurvedic Agro System</h1>
+
+            <p className="text-gray-600 mb-4 leading-relaxed">
+              Parnanetra has been working in Organic Agriculture since 1988, with over 30 years of experience in Sustainable Agriculture Solutions, Research & Development, and Manufacturing of Agro
+              Inputs.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="flex flex-col">
-                <i className="fa fa-seedling text-5xl text-green-700 mb-2"></i>
-                <h4 className="text-lg font-semibold text-gray-800">100% Organic</h4>
-                <p className="text-gray-600">Labore justo vero ipsum sit clita erat lorem magna clita nonumy dolor magna dolor vero</p>
+            <p className="text-gray-600 mb-4 leading-relaxed">
+              Our services and products are offered as an integrated system known as the <strong>“Parnanetra Ayurvedic Agro System”</strong>, based on the ancient Indian science of{" "}
+              <strong>“Rasayan Shastra – Ayurveda”</strong>.
+            </p>
+
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              This system is designed to combat modern agricultural challenges such as climate change, water scarcity, and soil degradation by restoring the natural balance of{" "}
+              <strong>Vata, Pitta, and Kapha</strong> in plants.
+            </p>
+
+            {/* Feature Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="bg-green-50 p-5 rounded-xl">
+                <h4 className="text-lg font-semibold text-green-800 mb-2">Ayurvedic Farming</h4>
+                <p className="text-gray-600 text-sm">Based on Tridosha balance to enhance plant vitality, immunity, and productivity naturally.</p>
               </div>
-              <div className="flex flex-col">
-                <i className="fa fa-award text-5xl text-green-700 mb-2"></i>
-                <h4 className="text-lg font-semibold text-gray-800">Award Winning</h4>
-                <p className="text-gray-600">Labore justo vero ipsum sit clita erat lorem magna clita nonumy dolor magna dolor vero</p>
+
+              <div className="bg-green-50 p-5 rounded-xl">
+                <h4 className="text-lg font-semibold text-green-800 mb-2">Sustainable Agriculture</h4>
+                <p className="text-gray-600 text-sm">Improves soil health, optimizes water usage, and supports long-term environmental sustainability.</p>
               </div>
             </div>
           </div>
