@@ -7,11 +7,14 @@ import { useAuth } from "../context/AuthContext";
 import { FaCheck, FaTrash, FaEdit } from "react-icons/fa";
 import CommonAlert from "../components/CommonAlert";
 import { updateProfile } from "../api/api";
+import Loading from "../components/Loading";
 
 export default function AdminDashboard() {
   const { auth, setAuth } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+
+  const [loading, setLoading] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState(null);
@@ -33,12 +36,15 @@ export default function AdminDashboard() {
 
   // Fetch all users
   const getAllUsers = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`${BASE_URL}/auth/admin/get-users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data.users);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error("Error fetching users:", error);
     }
   };
@@ -225,75 +231,80 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-          <table className="w-full text-left border border-gray-300 rounded-lg">
-            <thead className="bg-green-600 text-white">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Role</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-center">Actions</th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {users.length === 0 || users.length === 1 ? (
+          {loading ? (
+            <Loading />
+          ) : (
+            <table className="w-full text-left border border-gray-300 rounded-lg">
+              <thead className="bg-green-600 text-white">
                 <tr>
-                  <td colSpan="5" className="text-center p-4 text-gray-500">
-                    No users found.
-                  </td>
+                  <th className="p-3">Name</th>
+                  <th className="p-3">Email</th>
+                  <th className="p-3">Role</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3 text-center">Actions</th>
                 </tr>
-              ) : (
-                <>
-                  {users
-                    .filter((u) => u._id !== currentAdmin?._id)
-                    .map((u) => (
-                      <tr key={u._id} className="border-b hover:bg-green-100">
-                        <td className="p-3">{u.name}</td>
-                        <td className="p-3">{u.email}</td>
-                        <td className="p-3 capitalize">{u.role}</td>
-                        <td className="p-3">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
+              </thead>
 
-                        <td className="p-3 whitespace-nowrap">
-                          <div className="flex flex-nowrap items-center justify-start gap-2">
-                            {/* Role Select */}
-                            {canChangeRole(u) && (
-                              <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm w-24">
-                                <option value="user">User</option>
-                                <option value="subadmin">Sub Admin</option>
+              <tbody>
+                {users.length === 0 || users.length === 1 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center p-4 text-gray-500">
+                      No users found.
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {users
+                      .filter((u) => u._id !== currentAdmin?._id)
+                      .map((u) => (
+                        <tr key={u._id} className="border-b hover:bg-green-100">
+                          <td className="p-3">{u.name}</td>
+                          <td className="p-3">{u.email}</td>
+                          <td className="p-3 capitalize">{u.role}</td>
+                          <td className="p-3">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
 
-                                {isAdmin && <option value="admin">Admin</option>}
-                              </select>
-                            )}
+                          <td className="p-3 whitespace-nowrap">
+                            <div className="flex flex-nowrap items-center justify-start gap-2">
+                              {/* Role Select */}
+                              {canChangeRole(u) && (
+                                <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm w-24">
+                                  <option value="user">User</option>
+                                  <option value="subadmin">Sub Admin</option>
 
-                            {/* Edit */}
-                            {canEditUser(u) && (
-                              <button onClick={() => openEditUserModal(u)} title="Edit User" className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full">
-                                <FaEdit size={14} />
-                              </button>
-                            )}
+                                  {isAdmin && <option value="admin">Admin</option>}
+                                </select>
+                              )}
 
-                            {/* Delete */}
-                            {canDeleteUser(u) && (
-                              <button onClick={() => deleteUser(u._id)} title="Delete User" className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full">
-                                <FaTrash size={14} />
-                              </button>
-                            )}
+                              {/* Edit */}
+                              {canEditUser(u) && (
+                                <button onClick={() => openEditUserModal(u)} title="Edit User" className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full">
+                                  <FaEdit size={14} />
+                                </button>
+                              )}
 
-                            {/* Approve */}
-                            {!u.approved && u.role !== "admin" && (
-                              <button onClick={() => approveUser(u._id)} title="Approve User" className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full">
-                                <FaCheck size={14} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </>
-              )}
-            </tbody>
-          </table>
+                              {/* Delete */}
+                              {canDeleteUser(u) && (
+                                <button onClick={() => deleteUser(u._id)} title="Delete User" className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full">
+                                  <FaTrash size={14} />
+                                </button>
+                              )}
+
+                              {/* Approve */}
+                              {!u.approved && u.role !== "admin" && (
+                                <button onClick={() => approveUser(u._id)} title="Approve User" className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full">
+                                  <FaCheck size={14} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
       {showModal && (

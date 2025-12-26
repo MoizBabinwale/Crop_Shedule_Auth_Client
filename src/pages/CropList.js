@@ -47,8 +47,6 @@ function CropList() {
   const fetchCrops = async () => {
     const res = await getCropData();
     if (res.data) {
-      console.log("res.data ", res.data);
-
       setCropList(res.data);
       setLoading(false);
     } else {

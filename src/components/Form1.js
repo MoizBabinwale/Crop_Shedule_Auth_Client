@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import bgImage from "../assets/farme.jpg";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
+import CommonAlert from "./CommonAlert";
 
 // import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 // import InstructionSelector from "./InstructionSelector";
@@ -18,6 +19,7 @@ const Form1 = () => {
   const [weekForms, setWeekForms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [approvedStatus, setApprovedStatus] = useState(false);
+  const [approveLoading, setApproveLoading] = useState(false);
   const [totalPlants, setTotalPlants] = useState(0);
 
   const queryParams = new URLSearchParams(location.search);
@@ -28,6 +30,11 @@ const Form1 = () => {
   const [isBillReady, setIsBillReady] = useState(false);
   const [scheduleId, setScheduleId] = useState("");
   const [cropWeekInterval, setCropWeekInterval] = useState(0);
+
+  const [alert, setAlert] = useState({
+    message: "",
+    type: "success",
+  });
 
   // Fetch products once
   useEffect(() => {
@@ -271,14 +278,13 @@ const Form1 = () => {
       fetchSchedule();
       getCropDataById(cropId);
     }
-  }, [cropId, productsLoaded, approvedStatus]);
+  }, [cropId, productsLoaded]);
 
   const fetchSchedule = async () => {
     try {
       setLoading(true);
       const res = await getSchedulesByCropId(cropId);
       if (res) {
-        console.log("res ", res);
         setApprovedStatus(res?.approved);
       }
       if (res && res.weeks?.length > 0) {
@@ -427,14 +433,20 @@ const Form1 = () => {
 
   const handleApprove = async () => {
     try {
+      setApproveLoading(true);
       const res = await approveSchedule(scheduleId);
-      console.log("hitted ", res);
+
       if (res.status === 200) {
-        setApprovedStatus(res?.data?.approved);
+        setAlert({
+          message: "Crop Approved Successfully!",
+          type: "success",
+        });
+        setApprovedStatus(true);
       }
-      // window.location.reload();
     } catch (error) {
       console.error("Approval failed", error);
+    } finally {
+      setApproveLoading(false);
     }
   };
 
@@ -465,12 +477,19 @@ const Form1 = () => {
                     <span className="font-semibold text-green-700"> 🧾शेड्यूल बिल:</span> {isBillReady ? <>तयार आहे</> : <>तयार नाही</>}
                   </p>
                 </div>
-                {!approvedStatus && (
+                {!approvedStatus ? (
                   <div>
-                    <button onClick={handleApprove} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
-                      Approve Schedule
+                    <button
+                      onClick={handleApprove}
+                      disabled={approveLoading}
+                      className={`px-4 py-2 rounded-md text-sm text-white 
+                      ${approveLoading ? "bg-green-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
+                    >
+                      {approveLoading ? "Approving..." : "Approve Schedule"}
                     </button>
                   </div>
+                ) : (
+                  <p className="text-green-500 font-semibold">Approved</p>
                 )}
               </div>
               <div className="mt-3">
@@ -752,6 +771,8 @@ const Form1 = () => {
           </div>
         </div>
       )}
+
+      <CommonAlert message={alert.message} type={alert.type} onClose={() => setAlert({ ...alert, message: "" })} />
     </>
   );
 };
