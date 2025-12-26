@@ -150,13 +150,15 @@ export const createQuotation = async (quotationData) => {
 
 export const getAllQuotations = async () => {
   try {
-    const res = await axios.get(`${BASE_URL}/quotations`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    if (token) {
+      const res = await axios.get(`${BASE_URL}/quotations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    return res.data;
+      return res.data;
+    }
   } catch (error) {
     console.error("Error creating quotation:", error);
     throw new Error(error.response?.data?.error || "Failed to create quotation.");
@@ -276,7 +278,7 @@ export const copyCrop = async (cropId, data) => {
 
 export const getUserQuotations = async () => {
   const token = sessionStorage.getItem("token");
-  const res = await axios.get(`${BASE_URL}/quotations/user`, {
+  const res = await axios.get(`${BASE_URL}/quotations/by-user`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;

@@ -231,7 +231,14 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-
+          <div className="bg-green-100 p-6 rounded-xl shadow w-1/2 mb-3">
+            {" "}
+            <h2 className="font-bold text-xl text-green-700 mb-2">📄 Quotations</h2> <p className="text-gray-700">Check your generated quotations.</p>{" "}
+            <button onClick={() => navigate("/quotation/master")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+              {" "}
+              View Quotations{" "}
+            </button>{" "}
+          </div>{" "}
           {loading ? (
             <Loading />
           ) : (

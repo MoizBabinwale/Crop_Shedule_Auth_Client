@@ -12,6 +12,8 @@ const QuatationGen = () => {
   const { quatationId } = useParams();
   const [quotation, setQuotation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState("mr"); // "mr" | "en"
+
   const navigate = useNavigate();
   useEffect(() => {
     const fetchQuotation = async () => {
@@ -61,6 +63,84 @@ const QuatationGen = () => {
       return match;
     });
   }
+
+  const detectEnglishExtraInstruction = (mrInstruction = "") => {
+    const text = mrInstruction.toLowerCase();
+
+    if (text.includes("ड्रेंचिंग") || text.includes("drenching")) {
+      return "Apply the mixture through drip irrigation or by drenching.";
+    }
+
+    if (text.includes("स्प्रे") || text.includes("spray") || text.includes("ड्रिप") || text.includes("drip")) {
+      return "Apply this mixture by spraying or through drip irrigation system.";
+    }
+
+    return "Apply the prepared mixture as per recommended method.";
+  };
+
+  const buildEnglishInstruction = (week) => {
+    const products = Object.values(week.products || {}).filter((p) => p.category !== "खेत पर पत्तों से धुवा");
+
+    const productText = products
+      .map((p) => {
+        const { ml, l } = parseQtyString(p.quantity);
+        if (l) return `${p.name} ${l} liter`;
+        if (ml) return `${p.name} ${ml} ml`;
+        return p.name;
+      })
+      .join(" and ");
+
+    const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} liter`;
+
+    const extraLine = detectEnglishExtraInstruction(week.instructions);
+
+    return {
+      prefix: "Mix ",
+      highlighted: `${productText} with ${water}`,
+      suffix: ` of water to prepare the solution. Prepare the mixture by mixing with water. ${extraLine}`,
+      totalWater: week.totalWater ? `— Total ${week.totalWater} liter water required` : null,
+    };
+  };
+
+  const buildInstructionByLanguage = (week, language) => {
+    if (language === "en") return buildEnglishInstruction(week);
+    return buildMarathiInstruction(week);
+  };
+
+  const parseQtyString = (qtyStr = "") => {
+    let ml = null;
+    let l = null;
+
+    const mlMatch = qtyStr.match(/([\d.]+)\s*ml/i);
+    if (mlMatch) ml = parseFloat(mlMatch[1]);
+
+    const lMatch = qtyStr.match(/([\d.]+)\s*(ltr|liter|लीटर)/i);
+    if (lMatch) l = parseFloat(lMatch[1]);
+
+    return { ml, l };
+  };
+
+  const buildMarathiInstruction = (week) => {
+    const products = Object.values(week.products || {}).filter((p) => p.category !== "खेत पर पत्तों से धुवा");
+
+    const productText = products
+      .map((p) => {
+        const { ml, l } = parseQtyString(p.quantity);
+        if (l) return `${p.name} ${l} लीटर`;
+        if (ml) return `${p.name} ${ml} ml`;
+        return p.name;
+      })
+      .join(" आणि ");
+
+    const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} लीटर`;
+
+    return {
+      prefix: "",
+      highlighted: `${productText} ${water}`,
+      suffix: ` पाणी मध्ये मिसळून द्रावण तयार करावे. ${week.instructions || ""}`,
+      totalWater: week.totalWater ? `— एकूण ${week.totalWater} लीटर पाणी लागेल` : null,
+    };
+  };
 
   return (
     <div className="p-4 sm:p-6 md:p-8 print:p-4 print:text-xl">
@@ -153,6 +233,12 @@ const QuatationGen = () => {
           </div>
         </div>
 
+        <div className="flex justify-end mb-3">
+          <select value={language} onChange={(e) => setLanguage(e.target.value)} className="border border-green-500 rounded-md px-3 py-1 text-sm focus:outline-none">
+            <option value="mr">मराठी</option>
+            <option value="en">English</option>
+          </select>
+        </div>
         {quotation.weeks.map((week, index) => (
           <div key={index} className="print:table-header-group my-3 py-5 overflow-x-auto print:overflow-visible print:w-full mt-6 break-avoid">
             <table className="table-auto min-w-max border border-separate text-xs print:text-[10px] w-full" style={{ borderSpacing: "0 6px" }}>
@@ -215,87 +301,26 @@ const QuatationGen = () => {
                       ))}
                     </ul>
                   </td>
-                  <td className="border px-2 py-1 break-words max-w-[250px] break-inside-avoid-page">
-                    <div>
-                      {Object.entries(week.products).length > 0 && week.instructions && (
-                        <p className="text-sm text-green-900 leading-relaxed">
-                          {(() => {
-                            // Helper to parse qty string like "300 ml/grm & 0.300 ltr/kg"
-                            const parseQtyString = (qtyStr) => {
-                              let ml = null;
-                              let l = null;
+                  <td className="border px-2 py-1 max-w-[250px] break-words">
+                    {week.products &&
+                      (() => {
+                        const text = buildInstructionByLanguage(week, language);
 
-                              // Match ml
-                              const mlMatch = qtyStr.match(/([\d.]+)\s*ml/);
-                              if (mlMatch) ml = parseFloat(mlMatch[1]);
+                        return (
+                          <p className="text-sm text-green-900 leading-relaxed">
+                            {text.prefix}
+                            <span className="font-bold">{text.highlighted}</span>
+                            {text.suffix}
 
-                              // Match liter
-                              const lMatch = qtyStr.match(/([\d.]+)\s*(?:ltr|लीटर)/);
-                              if (lMatch) l = parseFloat(lMatch[1]);
-
-                              return { ml, l };
-                            };
-
-                            // Normal products
-                            const normalProducts = Object.entries(week.products)
-                              .filter(([id, data]) => data?.category !== "खेत पर पत्तों से धुवा")
-                              .map(([id, data]) => {
-                                // const productName = products.find((p) => p._id === id)?.name || "Unknown";
-
-                                const { ml, l } = parseQtyString(data.quantity);
-
-                                let qtyText = "";
-                                if (l && l >= 1) {
-                                  qtyText = `${l} लीटर`;
-                                } else if (ml && ml > 0) {
-                                  qtyText = `${ml} ml`;
-                                }
-
-                                return `${data.name} ${qtyText}`;
-                              });
-
-                            // धुवा products
-                            const smokeProducts = Object.entries(week.products)
-                              .filter(([id, data]) => data?.category === "खेत पर पत्तों से धुवा")
-                              .map(([id, data]) => {
-                                // const productName = products.find((p) => p._id === id)?.name || "Unknown";
-
-                                const { l } = parseQtyString(data.quantity || "");
-
-                                let qtyText = "";
-                                if (l && l > 0) {
-                                  qtyText = `${l} किलो`;
-                                }
-
-                                return `${data.name} ${qtyText} धुवा करना.`;
-                              });
-
-                            return (
+                            {text.totalWater && (
                               <>
-                                <span className="font-bold text-green-900">
-                                  {normalProducts.join(" और ")} को{" "}
-                                  {week.waterPerAcre * week.totalAcres < 0.5
-                                    ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml`
-                                    : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} लीटर`}
-                                </span>{" "}
-                                {week.instructions}
-                                {smokeProducts.length > 0 && (
-                                  <>
-                                    {" "}
-                                    और <span className="font-bold text-green-900">{smokeProducts.join(" और ")}</span>
-                                  </>
-                                )}
-                                {week.totalWater && (
-                                  <>
-                                    <br /> <span className="font-bold text-green-900">— एकूण {week.totalWater} लीटर पाणी लागेल</span>
-                                  </>
-                                )}
+                                <br />
+                                <span className="font-bold">{text.totalWater}</span>
                               </>
-                            );
-                          })()}
-                        </p>
-                      )}
-                    </div>
+                            )}
+                          </p>
+                        );
+                      })()}
                   </td>
                 </tr>
               </tbody>

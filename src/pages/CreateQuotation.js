@@ -309,6 +309,25 @@ function CropList() {
     }
   };
 
+  // Load logged in user
+  useEffect(() => {
+    const loggedInUser = JSON.parse(sessionStorage.getItem("user"));
+    console.log("loggedInUser ", loggedInUser);
+
+    if (loggedInUser) {
+      // setUserData(loggedInUser);
+      setFarmerInfo({
+        _id: loggedInUser._id || "",
+        name: loggedInUser.name || "",
+        place: loggedInUser.place || "",
+        tahsil: loggedInUser.tahsil || "",
+        district: loggedInUser.district || "",
+        state: loggedInUser.state || "",
+        startDate: "",
+      });
+    }
+  }, []);
+
   const promptFarmerDetails = () => {
     return new Promise((resolve) => {
       const name = prompt("Enter Farmer Name:");

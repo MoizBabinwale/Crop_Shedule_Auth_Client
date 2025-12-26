@@ -21,7 +21,12 @@ const Navbar = () => {
     { to: "/products", label: "PRODUCT", visible: true, visible: auth?.user && auth.user?.role !== "user" },
 
     // 🔥 Only show for admin + subadmin
-    { to: "/quotation/master", label: "QUOTATION MASTER", visible: auth?.user && auth.user?.role !== "user" },
+    {
+      to: "/quotation/master",
+      label: auth?.user?.role === "user" ? "VIEW QUOTATIONS" : "QUOTATION MASTER",
+      visible: true,
+    },
+
     { to: "/quotation/createQuotation", label: "GENERATE QUOTATION ", visible: auth?.user && auth.user?.role === "user" },
 
     { to: "/contact", label: "CONTACT", visible: true },
