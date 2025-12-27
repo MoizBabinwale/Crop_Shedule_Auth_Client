@@ -312,7 +312,6 @@ function CropList() {
   // Load logged in user
   useEffect(() => {
     const loggedInUser = JSON.parse(sessionStorage.getItem("user"));
-    console.log("loggedInUser ", loggedInUser);
 
     if (loggedInUser) {
       // setUserData(loggedInUser);

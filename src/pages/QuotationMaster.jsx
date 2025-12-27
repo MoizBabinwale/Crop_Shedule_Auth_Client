@@ -44,7 +44,10 @@ function QuotationMaster() {
   const fetchQuotations = useCallback(async () => {
     try {
       setLoading(true);
-      const res = role === "admin" || role === "subadmin" ? await getAllQuotations() : await getUserQuotations();
+
+      if (!auth?.user) return; // safety
+
+      const res = auth.user.role === "admin" || auth.user.role === "subadmin" ? await getAllQuotations() : await getUserQuotations();
 
       setQuotations(res || []);
     } catch (err) {
@@ -53,13 +56,14 @@ function QuotationMaster() {
     } finally {
       setLoading(false);
     }
-  }, [role]);
+  }, [auth]);
 
   useEffect(() => {
-    if (!authLoading && role) {
+    if (!authLoading) {
       fetchQuotations();
     }
-  }, [authLoading, role, fetchQuotations]);
+  }, [authLoading, fetchQuotations]);
+
   /* ---------------- DELETE ---------------- */
   const handleDelete = async () => {
     try {

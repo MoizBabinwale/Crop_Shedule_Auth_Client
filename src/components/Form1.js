@@ -17,7 +17,7 @@ const Form1 = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [weekForms, setWeekForms] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [approvedStatus, setApprovedStatus] = useState(false);
   const [approveLoading, setApproveLoading] = useState(false);
   const [totalPlants, setTotalPlants] = useState(0);
@@ -41,6 +41,23 @@ const Form1 = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    const init = async () => {
+      if (!cropId || !productsLoaded) return;
+
+      try {
+        setLoading(true);
+        await Promise.all([fetchSchedule(), getCropDataById(cropId)]);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
+  }, [cropId, productsLoaded]);
 
   const fetchProducts = async () => {
     const data = await getProductList();
@@ -273,20 +290,14 @@ const Form1 = () => {
 
   const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  useEffect(() => {
-    if (cropId && productsLoaded) {
-      fetchSchedule();
-      getCropDataById(cropId);
-    }
-  }, [cropId, productsLoaded]);
-
   const fetchSchedule = async () => {
     try {
-      setLoading(true);
       const res = await getSchedulesByCropId(cropId);
+
       if (res) {
         setApprovedStatus(res?.approved);
       }
+
       if (res && res.weeks?.length > 0) {
         const formattedWeeks = res.weeks.map((week) => {
           const productsObject = {};
@@ -299,20 +310,19 @@ const Form1 = () => {
                 const productId = matched._id;
                 const [ml = "", l = ""] = product.quantity.split("&").map((q) => q.trim().split(" ")[0]);
 
-                // ✅ Calculate totalRate if ml and rate are available
                 let totalRate = 0;
                 if (ml && product?.rate) {
                   totalRate = (parseFloat(ml) * product.rate).toFixed(2);
                 }
 
                 productsObject[productId] = {
-                  ml: ml || "",
-                  l: l || "",
+                  ml,
+                  l,
                   perLitreMix: product.perLitreMix,
                   instruction: product.instruction,
                   category: product?.category,
                   rate: product?.rate,
-                  totalRate, // <-- store here
+                  totalRate,
                 };
               }
             });
@@ -333,7 +343,6 @@ const Form1 = () => {
           setTotalPlants(Number(res.totalPlants));
         }
       } else {
-        // If no schedule exists, initialize empty weekForms
         setWeekForms(
           Array.from({ length: weeks }, (_, i) => ({
             weekNumber: i + 1,
@@ -349,14 +358,12 @@ const Form1 = () => {
           }))
         );
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching schedule:", error);
     }
   };
 
   const getCropDataById = async (cropId) => {
-    setLoading(true);
     try {
       const res = await getCropById(cropId);
       if (res) {

@@ -150,18 +150,22 @@ export const createQuotation = async (quotationData) => {
 
 export const getAllQuotations = async () => {
   try {
-    if (token) {
-      const res = await axios.get(`${BASE_URL}/quotations`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const token = sessionStorage.getItem("token"); // ✅ moved here
 
-      return res.data;
+    if (!token) {
+      throw new Error("No auth token found");
     }
+
+    const res = await axios.get(`${BASE_URL}/quotations`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
   } catch (error) {
-    console.error("Error creating quotation:", error);
-    throw new Error(error.response?.data?.error || "Failed to create quotation.");
+    console.error("Error fetching quotations:", error);
+    throw error;
   }
 };
 
@@ -380,5 +384,28 @@ export const updateProfile = async (userData, userId) => {
   const res = await axios.put(`${BASE_URL}/auth/admin/edit-user/${userId}`, userData, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  return res.data;
+};
+
+export const getMyQuotationCount = async () => {
+  const token = sessionStorage.getItem("token");
+
+  const res = await axios.get(BASE_URL + `/quotations/count/my`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+export const getQuotationCountByUser = async () => {
+  const token = sessionStorage.getItem("token");
+
+  const res = await axios.get(BASE_URL + `/quotations/count/by-user`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   return res.data;
 };

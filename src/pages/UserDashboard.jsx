@@ -4,11 +4,12 @@ import { useAuth } from "../context/AuthContext";
 import { FaPencil } from "react-icons/fa6";
 import CommonAlert from "../components/CommonAlert";
 
-import { updateUserProfile } from "../api/api"; // adjust path
+import { getMyQuotationCount, updateUserProfile } from "../api/api"; // adjust path
 
 export default function UserDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [quotationCount, setQuotationCount] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -81,6 +82,19 @@ export default function UserDashboard() {
     setDetailForm({ ...detailform, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const res = await getMyQuotationCount();
+        setQuotationCount(res.count);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCount();
+  }, []);
+
   return (
     <div className="min-h-screen bg-green-50 p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-6">
@@ -139,13 +153,16 @@ export default function UserDashboard() {
                 </div>
               )}{" "}
               <div className="bg-green-100 p-6 rounded-xl shadow">
-                {" "}
-                <h2 className="font-bold text-xl text-green-700 mb-2">📄 Quotations</h2> <p className="text-gray-700">Check your generated quotations.</p>{" "}
+                <h2 className="font-bold text-xl text-green-700 mb-2">📄 Quotations</h2>
+
+                <p className="text-gray-700">
+                  Total Generated: <span className="font-bold">{quotationCount}</span>
+                </p>
+
                 <button onClick={() => navigate("/quotation/master")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-                  {" "}
-                  View Quotations{" "}
-                </button>{" "}
-              </div>{" "}
+                  View Quotations
+                </button>
+              </div>
             </div>
             {/* NAME (Read Only) */}
           </div>

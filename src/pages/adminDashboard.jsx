@@ -6,8 +6,9 @@ import { FaPencil } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import { FaCheck, FaTrash, FaEdit } from "react-icons/fa";
 import CommonAlert from "../components/CommonAlert";
-import { updateProfile } from "../api/api";
+import { getMyQuotationCount, getQuotationCountByUser, updateProfile } from "../api/api";
 import Loading from "../components/Loading";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function AdminDashboard() {
   const { auth, setAuth } = useAuth();
@@ -30,6 +31,10 @@ export default function AdminDashboard() {
     type: "success",
   });
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUserName, setSelectedUserName] = useState("");
+
   const token = sessionStorage.getItem("token");
 
   const currentRole = auth?.user?.role; // "admin" | "subadmin"
@@ -41,6 +46,8 @@ export default function AdminDashboard() {
       const response = await axios.get(`${BASE_URL}/auth/admin/get-users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("response.data.users ", response.data.users);
+
       setUsers(response.data.users);
       setLoading(false);
     } catch (error) {
@@ -183,6 +190,22 @@ export default function AdminDashboard() {
     return false;
   };
 
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteUser(selectedUserId); // 🔥 API call
+
+      setConfirmOpen(false);
+      setSelectedUserId(null);
+      setSelectedUserName("");
+
+      // Optional: refresh users list
+      getAllUsers();
+    } catch (err) {
+      console.error(err);
+      setConfirmOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-green-50 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-6">
@@ -248,66 +271,83 @@ export default function AdminDashboard() {
                   <th className="p-3">Name</th>
                   <th className="p-3">Email</th>
                   <th className="p-3">Role</th>
+                  <th className="p-3 text-center">Quotations</th>
                   <th className="p-3">Status</th>
                   <th className="p-3 text-center">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {users.length === 0 || users.length === 1 ? (
+                {users.length <= 1 ? (
                   <tr>
-                    <td colSpan="5" className="text-center p-4 text-gray-500">
+                    <td colSpan="6" className="text-center p-4 text-gray-500">
                       No users found.
                     </td>
                   </tr>
                 ) : (
-                  <>
-                    {users
-                      .filter((u) => u._id !== currentAdmin?._id)
-                      .map((u) => (
-                        <tr key={u._id} className="border-b hover:bg-green-100">
-                          <td className="p-3">{u.name}</td>
-                          <td className="p-3">{u.email}</td>
-                          <td className="p-3 capitalize">{u.role}</td>
-                          <td className="p-3">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
+                  users
+                    .filter((u) => u._id !== currentAdmin?._id)
+                    .map((u) => (
+                      <tr key={u._id} className="border-b hover:bg-green-50 transition">
+                        {/* NAME */}
+                        <td className="p-3 font-medium text-gray-800">{u.name}</td>
 
-                          <td className="p-3 whitespace-nowrap">
-                            <div className="flex flex-nowrap items-center justify-start gap-2">
-                              {/* Role Select */}
-                              {canChangeRole(u) && (
-                                <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm w-24">
-                                  <option value="user">User</option>
-                                  <option value="subadmin">Sub Admin</option>
+                        {/* EMAIL */}
+                        <td className="p-3 text-gray-700">{u.email}</td>
 
-                                  {isAdmin && <option value="admin">Admin</option>}
-                                </select>
-                              )}
+                        {/* ROLE */}
+                        <td className="p-3 capitalize">
+                          <span className="px-2 py-1 rounded-md bg-gray-200 text-sm font-semibold">{u.role}</span>
+                        </td>
 
-                              {/* Edit */}
-                              {canEditUser(u) && (
-                                <button onClick={() => openEditUserModal(u)} title="Edit User" className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full">
-                                  <FaEdit size={14} />
-                                </button>
-                              )}
+                        {/* QUOTATIONS COUNT */}
+                        <td className="p-3 text-center font-bold text-green-700">{u.totalQuotations || 0}</td>
 
-                              {/* Delete */}
-                              {canDeleteUser(u) && (
-                                <button onClick={() => deleteUser(u._id)} title="Delete User" className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full">
-                                  <FaTrash size={14} />
-                                </button>
-                              )}
+                        {/* STATUS */}
+                        <td className="p-3">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
 
-                              {/* Approve */}
-                              {!u.approved && u.role !== "admin" && (
-                                <button onClick={() => approveUser(u._id)} title="Approve User" className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full">
-                                  <FaCheck size={14} />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                  </>
+                        {/* ACTIONS */}
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            {/* Role Change */}
+                            {canChangeRole(u) && (
+                              <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm">
+                                <option value="user">User</option>
+                                <option value="subadmin">Sub Admin</option>
+                                {isAdmin && <option value="admin">Admin</option>}
+                              </select>
+                            )}
+
+                            {/* Edit */}
+                            {canEditUser(u) && (
+                              <button onClick={() => openEditUserModal(u)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full" title="Edit User">
+                                <FaEdit size={14} />
+                              </button>
+                            )}
+
+                            {/* Delete */}
+                            <button
+                              onClick={() => {
+                                setSelectedUserId(u._id);
+                                setSelectedUserName(u.name);
+                                setConfirmOpen(true);
+                              }}
+                              className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
+                              title="Delete User"
+                            >
+                              <FaTrash size={14} />
+                            </button>
+
+                            {/* Approve */}
+                            {!u.approved && u.role !== "admin" && (
+                              <button onClick={() => approveUser(u._id)} className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full" title="Approve User">
+                                <FaCheck size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
                 )}
               </tbody>
             </table>
@@ -401,6 +441,15 @@ export default function AdminDashboard() {
       )}
 
       <CommonAlert message={alert.message} type={alert.type} onClose={() => setAlert({ ...alert, message: "" })} />
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Delete User"
+        message={`Are you sure you want to delete "${selectedUserName}"?`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }
