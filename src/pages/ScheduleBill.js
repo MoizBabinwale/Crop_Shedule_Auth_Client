@@ -297,7 +297,7 @@ const ScheduleBill = () => {
   }
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-bold text-green-800 mb-6 text-center">🧾 Schedule Bill तयार करा</h2>
+      <h2 className="text-2xl font-bold text-green-800 mb-6 text-center">🧾 Schedule Bill तयार करा - {cropName}</h2>
 
       <div className="flex flex-col gap-6">
         {/* Product Entry Section */}

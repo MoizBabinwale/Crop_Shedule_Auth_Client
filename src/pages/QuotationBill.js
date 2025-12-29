@@ -75,8 +75,8 @@ const QuotationBill = () => {
   const { cropName, billDate, farmerInfo, items = [], additionalInfo = {} } = billData;
 
   return (
-    <div className="pt-4 px-4  max-w-6xl mx-auto bg-white border border-green-300 rounded shadow text-sm">
-      <div className="print-area pt-4 px-4 max-w-6xl mx-auto bg-white border-black text-sm ">
+    <div className="pt-4 px-4  mb-6 max-w-6xl mx-auto bg-white border border-green-300 rounded shadow text-sm">
+      <div className="print-area pt-4 px-4  mb-4 max-w-6xl mx-auto bg-white border-black text-sm ">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-green-700 flex items-center gap-2">

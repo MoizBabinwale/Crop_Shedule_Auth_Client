@@ -39,6 +39,8 @@ export const getCropById = async (cropId) => {
 
 export const submitData = async (cropId, schedule) => {
   try {
+    const token = sessionStorage.getItem("token");
+    const user = JSON.parse(sessionStorage.getItem("user"));
     const res = await axios.post(
       `${BASE_URL}/schedule/create/${cropId}`,
       {
@@ -156,13 +158,13 @@ export const getAllQuotations = async () => {
       throw new Error("No auth token found");
     }
 
-    const res = await axios.get(`${BASE_URL}/quotations`, {
+    const res = await axios.get(`${BASE_URL}/quotations/all`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    return res.data;
+    return res.data.quotations;
   } catch (error) {
     console.error("Error fetching quotations:", error);
     throw error;
