@@ -278,7 +278,14 @@ export const deleteInstruction = async (id) => {
 };
 
 export const copyCrop = async (cropId, data) => {
-  const res = await axios.post(`${BASE_URL}/schedule/copyCrop/${cropId}`, data);
+  const token = sessionStorage.getItem("token");
+
+  const res = await axios.post(`${BASE_URL}/schedule/copyCrop/${cropId}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   return res.data;
 };
 
