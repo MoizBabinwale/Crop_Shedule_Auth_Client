@@ -115,7 +115,7 @@ const QuotationBill = () => {
                 {/* Farmer Info Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
                   <span>
-                    <span className="font-medium">शेतकरी नाव (Name):</span> श्री {farmerInfo?.name}
+                    <span className="font-medium">शेतकरी नाव (Name):</span> {farmerInfo?.name}
                   </span>
                   <span>
                     <span className=" font-bold text-right">दिनांक: {new Date().toLocaleDateString("en-GB")}</span>
@@ -142,7 +142,7 @@ const QuotationBill = () => {
           {/* Farmer info */}
           <div className="print:hidden   grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
             <p>
-              <span className="font-medium">शेतकरी नाव (Name):</span> श्री {farmerInfo?.name}
+              <span className="font-medium">शेतकरी नाव (Name):</span> {farmerInfo?.name}
             </p>
             <p>
               <span className="font-medium">गाव (Place):</span> {farmerInfo?.place}

@@ -175,7 +175,7 @@ const QuatationGen = () => {
               {/* Farmer Info Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
                 <span>
-                  <span className="font-medium">शेतकरी नाव (Name):</span> श्री {quotation.farmerInfo?.name}
+                  <span className="font-medium">शेतकरी नाव (Name):</span> {quotation.farmerInfo?.name}
                 </span>
                 <span>
                   <span className="font-medium"></span>
@@ -204,7 +204,7 @@ const QuatationGen = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 print:hidden">
           <p>
-            <span className="font-medium">शेतकरी नाव (Name):</span> श्री {quotation.farmerInfo?.name}
+            <span className="font-medium">शेतकरी नाव (Name):</span> {quotation.farmerInfo?.name}
           </p>
           <p>
             <span className="font-medium"></span>
