@@ -2,9 +2,6 @@ import axios from "axios";
 
 import { BASE_URL } from "../config/baseURL.js";
 
-const token = sessionStorage.getItem("token");
-const user = JSON.parse(sessionStorage.getItem("user"));
-
 // Attach token manually like your style
 const getAuthHeader = () => {
   const token = sessionStorage.getItem("token");
@@ -73,6 +70,9 @@ export const editCropData = async (editCropId, newCrop) => {
 };
 export const addCropData = async (data) => {
   try {
+    const token = sessionStorage.getItem("token");
+    const user = JSON.parse(sessionStorage.getItem("user"));
+
     const res = await axios.post(
       `${BASE_URL}/crop/add`,
       {
@@ -379,6 +379,7 @@ export const getContactMessageById = async (id) => {
 };
 
 export const approveSchedule = (scheduleId) => {
+  const token = sessionStorage.getItem("token");
   return axios.put(
     `${BASE_URL}/schedule/approve/${scheduleId}`,
     {},
@@ -390,6 +391,7 @@ export const approveSchedule = (scheduleId) => {
   );
 };
 export const updateProfile = async (userData, userId) => {
+  const token = sessionStorage.getItem("token");
   const res = await axios.put(`${BASE_URL}/auth/admin/edit-user/${userId}`, userData, {
     headers: { Authorization: `Bearer ${token}` },
   });
