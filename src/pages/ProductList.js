@@ -171,7 +171,8 @@ const ProductList = () => {
 
             {/* दर (१ एकरासाठी) */}
             <div className="flex flex-col w-full sm:w-[30%]">
-              <label className="mb-1 text-green-800 font-medium text-sm">दर (ml/gram Rate)</label>
+              {" "}
+              <label className="mb-1 text-green-800 font-medium text-sm">दर (ml/gram Rate)</label>{" "}
               <input
                 type="number"
                 placeholder="उदा. 4.5"
@@ -179,10 +180,9 @@ const ProductList = () => {
                 value={productRate}
                 onChange={(e) => setProductRate(e.target.value)}
                 min="0"
-                step="0.01"
+                step="any"
               />
             </div>
-
             {/* दर (१ एकरासाठी) */}
             <div className="flex flex-col w-full sm:w-[30%]">
               <label className="mb-1 text-green-800 font-medium text-sm">बाटलीचे प्रमाण (ml)</label>
@@ -193,7 +193,6 @@ const ProductList = () => {
                 value={bottlePerml}
                 onChange={(e) => setBottlePerml(e.target.value)}
                 min="0"
-                step="1"
                 required
               />
             </div>
