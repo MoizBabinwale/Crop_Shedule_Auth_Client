@@ -52,6 +52,27 @@
     top: 0;
     width: 100%;
   }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  td {
+    padding: 4px 6px;
+    vertical-align: top;
+  }
+  .flex {
+    display: flex !important;
+  }
+
+  img {
+    display: block !important;
+  }
 
   /* Optional: Hide scrollbars */
   @page {

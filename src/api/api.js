@@ -48,7 +48,7 @@ export const submitData = async (cropId, schedule) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return res.data;
@@ -83,7 +83,7 @@ export const addCropData = async (data) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return res.data;
@@ -356,7 +356,7 @@ export const markNotificationRead = async (id) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return res.data;
@@ -387,7 +387,7 @@ export const approveSchedule = (scheduleId) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 };
 export const updateProfile = async (userData, userId) => {
@@ -406,17 +406,5 @@ export const getMyQuotationCount = async () => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return res.data;
-};
-
-export const getQuotationCountByUser = async () => {
-  const token = sessionStorage.getItem("token");
-
-  const res = await axios.get(BASE_URL + `/quotations/count/by-user`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
   return res.data;
 };

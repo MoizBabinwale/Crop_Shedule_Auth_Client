@@ -3,8 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createQuotationBill, getQuotationById } from "../api/api";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
-import Footer from "../components/Footer";
-import QuotationFooter from "../components/QuotationFooter";
+import translations from "../utils/translations";
 
 import logo from "../assets/logo.jpg";
 
@@ -13,6 +12,7 @@ const QuatationGen = () => {
   const [quotation, setQuotation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState("mr"); // "mr" | "en"
+  const t = translations[language] || translations.mr;
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -33,7 +33,7 @@ const QuatationGen = () => {
   if (loading)
     return (
       <p className="p-6 text-lg">
-        ⏳<Loading />
+        <Loading />
       </p>
     );
   if (!quotation) return <p className="p-6 text-red-600">❌ Quotation नहीं मिला</p>;
@@ -79,7 +79,7 @@ const QuatationGen = () => {
   };
 
   const buildEnglishInstruction = (week) => {
-    const products = Object.values(week.products || {}).filter((p) => p.category !== "खेत पर पत्तों से धुवा");
+    const products = Object.values(week.products || {}).filter((p) => p.categoryKey !== "leaf_smoke");
 
     const productText = products
       .map((p) => {
@@ -102,9 +102,26 @@ const QuatationGen = () => {
     };
   };
 
-  const buildInstructionByLanguage = (week, language) => {
-    if (language === "en") return buildEnglishInstruction(week);
-    return buildMarathiInstruction(week);
+  const buildHindiInstruction = (week) => {
+    const products = Object.values(week.products || {}).filter((p) => p.category !== "खेत पर पत्तों से धुवा");
+
+    const productText = products
+      .map((p) => {
+        const { ml, l } = parseQtyString(p.quantity);
+        if (l) return `${p.name} ${l} लीटर`;
+        if (ml) return `${p.name} ${ml} ml`;
+        return p.name;
+      })
+      .join(" और ");
+
+    const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} लीटर`;
+
+    return {
+      prefix: "",
+      highlighted: `${productText} ${water}`,
+      suffix: ` पानी में मिलाकर घोल तैयार करें। ${week.instructions || ""}`,
+      totalWater: week.totalWater ? `— कुल ${week.totalWater} लीटर पानी लगेगा` : null,
+    };
   };
 
   const parseQtyString = (qtyStr = "") => {
@@ -142,117 +159,135 @@ const QuatationGen = () => {
     };
   };
 
+  const buildGujaratiInstruction = (week) => {
+    const products = Object.values(week.products || {}).filter((p) => p.category !== "खेत पर पत्तों से धुवा");
+
+    const productText = products
+      .map((p) => {
+        const { ml, l } = parseQtyString(p.quantity);
+        if (l) return `${p.name} ${l} લીટર`;
+        if (ml) return `${p.name} ${ml} ml`;
+        return p.name;
+      })
+      .join(" અને ");
+
+    const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} લીટર`;
+
+    return {
+      prefix: "",
+      highlighted: `${productText} ${water}`,
+      suffix: ` પાણીમાં મિક્સ કરીને દ્રાવણ તૈયાર કરો. ${week.instructions || ""}`,
+      totalWater: week.totalWater ? `— કુલ ${week.totalWater} લીટર પાણી લાગશે` : null,
+    };
+  };
+  const buildInstructionByLanguage = (week, language) => {
+    if (language === "en") return buildEnglishInstruction(week);
+    if (language === "hi") return buildHindiInstruction(week);
+    if (language === "gu") return buildGujaratiInstruction(week);
+    return buildMarathiInstruction(week); // default
+  };
+
   return (
-    <div className="p-4 sm:p-6 md:p-8 print:p-4 print:text-xl">
+    <div className="p-4 sm:p-6 md:p-8 print:p-4 print:text-lg">
       {/* Button Actions */}
       <div className="flex flex-col sm:flex-row justify-end mb-4 print:hidden gap-3 sm:gap-10">
         <button onClick={() => window.print()} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow text-sm">
-          प्रिंट वेळापत्रक
+          {t.printSchedule}
         </button>
         <button onClick={() => handleGenerateBill(quotation)} className="bg-yellow-400 text-black px-3 py-2 rounded hover:bg-yellow-500 text-sm">
-          📄 कोटेशन प्रिंट
+          📄{t.printQuotation}
         </button>
       </div>
 
       {/* Main Print Area */}
       <div className="print-area bg-white p-4 sm:p-6 rounded shadow-md text-sm border border-gray-300 print:p-0 print:border-0 print:shadow-none print:rounded-none">
-        <div className="hidden print:block print-header">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 px-6">
-            {/* Left: Logo */}
-            <div className="flex-shrink-0 flex items-center justify-center">
-              <img src={logo} alt="Parnanetra Logo" className="h-20 w-auto object-contain print:h-16" />
+        {/* Header / Date Row */}
+        <div className="flex justify-between items-start">
+          <h3 className="text-green-700 font-semibold text-base mb-3">{t.farmerDetails}</h3>
+          <p className="font-bold text-right">
+            {t.date}: {new Date().toLocaleDateString("en-GB")}
+          </p>
+        </div>
+        {/* Header */}
+        <div className="flex items-start gap-4 px-4 py-2">
+          {/* ✅ Logo (VISIBLE EVERYWHERE) */}
+          <div className="flex-shrink-0">
+            <img src={logo} alt="Parnanetra Logo" className="h-16 w-auto object-contain" />
+          </div>
+
+          {/* ✅ Right Content */}
+          <div className="flex-1">
+            {/* Company Name */}
+            <div className="text-left mb-1">
+              <span className="text-base font-bold">
+                <span className="text-green-700">Parnanetra</span> Ayurvedic Agro System
+              </span>
             </div>
 
-            {/* Right: Company Name + Farmer Info */}
-            <div className="flex flex-col w-full">
-              {/* Company Name */}
-              <div className="text-center sm:text-left mb-2">
-                <span className="text-sm font-bold leading-tight">
-                  <span className="text-green-700">Parnanetra</span> Ayurvedic Agro System
-                </span>
-              </div>
+            {/* Farmer Info */}
+            <table className="w-full text-sm border-collapse">
+              <tbody>
+                <tr>
+                  <td className="font-semibold w-1/4">{t.farmer.name}:</td>
+                  <td className="w-1/4">{quotation.farmerInfo?.name || "-"}</td>
+                  <td className="font-semibold w-1/4">{t.farmer.number}:</td>
+                  <td className="w-1/4">{quotation.farmerInfo?.number || "-"}</td>
+                </tr>
 
-              {/* Farmer Info Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-                <span>
-                  <span className="font-medium">शेतकरी नाव (Name):</span> {quotation.farmerInfo?.name}
-                </span>
-                <span>
-                  <span className="font-medium"></span>
-                </span>
-                <span>
-                  <span className="font-medium">गाव (Place):</span> {quotation.farmerInfo?.place}
-                </span>
-                <span>
-                  <span className="font-medium">तालुका (Tahsil):</span> {quotation.farmerInfo?.tahsil}
-                </span>
-                <span>
-                  <span className="font-medium">जिल्हा (District):</span> {quotation.farmerInfo?.district}
-                </span>
-                <span>
-                  <span className="font-medium">राज्य (State):</span> {quotation.farmerInfo?.state}
-                </span>
-              </div>
-            </div>
+                <tr>
+                  <td className="font-semibold">{t.farmer.email}:</td>
+                  <td>{quotation.farmerInfo?.email || "-"}</td>
+                  <td className="font-semibold">{t.farmer.place}:</td>
+                  <td>{quotation.farmerInfo?.place || "-"}</td>
+                </tr>
+
+                <tr>
+                  <td className="font-semibold">{t.farmer.tahsil}:</td>
+                  <td>{quotation.farmerInfo?.tahsil || "-"}</td>
+                  <td className="font-semibold">{t.farmer.district}:</td>
+                  <td>{quotation.farmerInfo?.district || "-"}</td>
+                </tr>
+
+                <tr>
+                  <td className="font-semibold">{t.farmer.state}:</td>
+                  <td>{quotation.farmerInfo?.state || "-"}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-
-        <div className="flex justify-between items-start mb-3 print:hidden">
-          <h3 className="text-green-700 font-semibold text-base mb-3">👨‍🌾 शेतकरी माहिती (Farmer Details)</h3>
-          <p className="font-bold text-right">दिनांक: {new Date().toLocaleDateString("en-GB")}</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 print:hidden">
-          <p>
-            <span className="font-medium">शेतकरी नाव (Name):</span> {quotation.farmerInfo?.name}
-          </p>
-          <p>
-            <span className="font-medium"></span>
-          </p>
-          <p>
-            <span className="font-medium">गाव (Place):</span> {quotation.farmerInfo?.place}
-          </p>
-          <p>
-            <span className="font-medium">तालुका (Tahsil):</span> {quotation.farmerInfo?.tahsil}
-          </p>
-          <p>
-            <span className="font-medium">जिल्हा (District):</span> {quotation.farmerInfo?.district}
-          </p>
-          <p>
-            <span className="font-medium">राज्य (State):</span> {quotation.farmerInfo?.state}
-          </p>
-        </div>
-
-        {/* Header */}
-
         {/* Farmer Info */}
         {/* Screen Farmer Info (normal box) */}
-        <div className=" my-4 p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block">
-          <div className="text-center font-bold text-base sm:text-lg border-b leading-snug ">
-            {quotation.cropName} का {quotation.acres} एकड़ का प्लॉट और पर्णनेत्र आयुर्वेदीक कृषि प्रणाली का शेड्यूल
-          </div>
+        <div className=" my-2 p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block">
+          <div className="text-center font-bold text-base sm:text-lg border-b leading-snug ">{t.header(quotation.cropName, quotation.acres)}</div>
         </div>
 
-        <div className="flex justify-end mb-3">
+        <div className="flex justify-end mb-3 print:hidden">
           <select value={language} onChange={(e) => setLanguage(e.target.value)} className="border border-green-500 rounded-md px-3 py-1 text-sm focus:outline-none">
             <option value="mr">मराठी</option>
             <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="gu">ગુજરાતી</option>
           </select>
         </div>
         {quotation.weeks.map((week, index) => (
           <div key={index} className="print:table-header-group my-3 py-5 overflow-x-auto print:overflow-visible print:w-full mt-6 break-avoid">
-            <table className="table-auto min-w-max border border-separate text-xs print:text-[10px] w-full" style={{ borderSpacing: "0 6px" }}>
+            <table className="table-auto min-w-max border border-separate text-xs print:text-[14px] w-full" style={{ borderSpacing: "0 6px" }}>
               <thead className="bg-green-100 text-gray-900 ">
                 <tr>
-                  <th className="border px-2 py-2 whitespace-normal w-[50px]">सप्ताह</th>
-                  <th className="border px-2 py-2 whitespace-normal">तारीख/उपयोग दिन</th>
-                  <th className="border px-2 py-2  max-w-[250px]">उत्पाद</th>
-                  <th className="border px-2 py-2 print:hidden  whitespace-normal">प्रति लीटर पानी मे मिली</th>
-                  <th className="border px-2 py-2 whitespace-normal">पानी प्रती एकड़</th>
-                  {/* <th className="border px-2 py-1 whitespace-normal">कुल एकड़</th> */}
-                  <th className="border px-2 py-1 whitespace-normal">पानी कुल एकड़</th>
-                  <th className="border px-2 py-1  max-w-[250px]">उत्पाद व मात्रा</th>
-                  <th className="border px-2 py-1  max-w-[420px] w-[365px]">निर्देश</th>
+                  <th className="border px-2 py-2 whitespace-normal w-[50px]">{t.table.week}</th>
+                  <th className="border px-2 py-2 whitespace-normal">{t.table.date}</th>
+                  <th className="border px-2 py-2  max-w-[250px]"> {t.table.products}</th>
+                  <th className="border px-2 py-2 print:hidden  whitespace-normal"> {t.table.perLitre}</th>
+                  <th className="border px-2 py-2 whitespace-normal">{t.table.waterPerAcre}</th>
+
+                  <th className="border px-2 py-1 whitespace-normal">{t.table.totalWater}</th>
+
+                  <th className="border px-2 py-1 max-w-[250px]">{t.table.productQty}</th>
+
+                  <th className="border px-2 py-1 max-w-[420px] w-[365px]">{t.table.instruction}</th>
                 </tr>
               </thead>
               <tbody>
@@ -286,10 +321,10 @@ const QuatationGen = () => {
                         <div key={i} className="text-green-800">
                           {prod.name}: <span className="text-blue-700 font-medium">{prod.perLitreMix * quotation.acres}</span>
                         </div>
-                      ) : null
+                      ) : null,
                     )}
                   </td>
-                  <td className="border px-2 py-1 text-center">{week.waterPerAcre} ml</td>
+                  <td className="border px-2 py-1 text-center">{week.waterPerAcre} ltr</td>
                   {/* <td className="border px-2 py-1 text-center">{week.totalAcres}</td> */}
                   <td className="border px-2 py-1 text-center">{week.totalWater} लीटर </td>
                   <td className="border px-2 py-1 break-words">

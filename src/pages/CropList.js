@@ -33,6 +33,8 @@ function CropList() {
     tahsil: "",
     district: "",
     state: "",
+    number: "",
+    email: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -278,6 +280,8 @@ function CropList() {
         district: "",
         state: "",
         startDate: "",
+        number: "",
+        email: "",
       });
       const quotationId = res._id;
 
@@ -347,6 +351,8 @@ function CropList() {
         tahsil: loggedInUser.tahsil || "",
         district: loggedInUser.district || "",
         state: loggedInUser.state || "",
+        number: loggedInUser.number || "",
+        email: loggedInUser.email || "",
         startDate: "",
       });
     }
@@ -642,7 +648,7 @@ function CropList() {
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
               <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg space-y-3">
                 <h2 className="text-lg font-semibold text-green-700">Farmer Details</h2>
-
+                {/* Standard Text Fields */}
                 {["name", "place", "tahsil", "district", "state"].map((field) => (
                   <input
                     key={field}
@@ -655,6 +661,27 @@ function CropList() {
                   />
                 ))}
 
+                {/* Specific Field: Mobile Number */}
+                <input
+                  type="tel"
+                  name="number"
+                  placeholder="Enter mobile number"
+                  value={farmerInfo.number}
+                  onChange={(e) => setFarmerInfo({ ...farmerInfo, number: e.target.value })}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  maxLength={10} // Optional: Limits to 10 digits
+                  pattern="[0-9]*" // Optional: Encourages numeric keypad on mobile
+                />
+
+                {/* Specific Field: Email */}
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Enter email address"
+                  value={farmerInfo.email}
+                  onChange={(e) => setFarmerInfo({ ...farmerInfo, email: e.target.value })}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                />
                 <label className="block mt-2 text-sm text-gray-700">Select Starting Date</label>
                 <input
                   type="date"

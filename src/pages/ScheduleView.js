@@ -48,21 +48,6 @@ const ScheduleView = () => {
   //   return isNaN(num) ? 0 : num;
   // };
 
-  const cleanMgQuantity = (quantity) => {
-    if (!quantity) return "";
-    return quantity
-      .replace(/ml\/grm/gi, "") // remove ml/grm
-      .replace(/ltr\/kg/gi, "") // remove ltr/kg
-      .trim();
-  };
-  const cleanLitQuantity = (quantity) => {
-    if (!quantity) return "";
-    return quantity
-      .replace(/ml\/grm/gi, "") // remove ml/grm
-      .replace(/ltr\/kg/gi, "") // remove ltr/kg
-      .trim();
-  };
-
   if (scheduleNotFoud)
     return (
       <>
@@ -135,7 +120,7 @@ const ScheduleView = () => {
                         <div key={i} className="text-green-800">
                           {prod.name}: <span className="text-blue-700 font-medium">{prod.perLitreMix}</span>
                         </div>
-                      ) : null
+                      ) : null,
                     )}
                   </td>
                   <td className="border p-2">{week.waterPerAcre}</td>

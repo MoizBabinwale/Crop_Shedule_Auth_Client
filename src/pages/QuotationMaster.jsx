@@ -158,7 +158,7 @@ function QuotationMaster() {
       {/* TABLE */}
       {loading ? (
         <p className="p-6 text-lg">
-          ⏳<Loading />
+          <Loading />
         </p>
       ) : (
         <div className="bg-white rounded-xl shadow p-5">

@@ -6,9 +6,11 @@ import { FaPencil } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import { FaCheck, FaTrash, FaEdit } from "react-icons/fa";
 import CommonAlert from "../components/CommonAlert";
-import { getMyQuotationCount, getQuotationCountByUser, updateProfile } from "../api/api";
+import { updateProfile } from "../api/api";
 import Loading from "../components/Loading";
 import ConfirmDialog from "../components/ConfirmDialog";
+
+import { useCallback } from "react";
 
 export default function AdminDashboard() {
   const { auth, setAuth } = useAuth();
@@ -40,21 +42,23 @@ export default function AdminDashboard() {
   const currentRole = auth?.user?.role; // "admin" | "subadmin"
 
   // Fetch all users
-  const getAllUsers = async () => {
+  const getAllUsers = useCallback(async () => {
     setLoading(true);
+
     try {
       const response = await axios.get(`${BASE_URL}/auth/admin/get-users`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      console.log("response.data.users ", response.data.users);
 
       setUsers(response.data.users);
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [token]);
 
   // Approve user
   const approveUser = async (id) => {
@@ -102,7 +106,7 @@ export default function AdminDashboard() {
         state: loggedInUser.state || "",
       });
     }
-  }, []);
+  }, [getAllUsers]);
 
   const handleSaveProfile = async () => {
     try {
@@ -173,12 +177,6 @@ export default function AdminDashboard() {
   const isSubAdmin = currentRole === "subadmin";
 
   const canEditUser = (user) => {
-    if (isAdmin) return true;
-    if (isSubAdmin && user.role !== "admin") return true;
-    return false;
-  };
-
-  const canDeleteUser = (user) => {
     if (isAdmin) return true;
     if (isSubAdmin && user.role !== "admin") return true;
     return false;

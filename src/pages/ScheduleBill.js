@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getScheduleBillByScheduleId, createScheduleBill, getProductList, getScheduleById } from "../api/api"; // adjust your import path
+import { getScheduleBillByScheduleId, createScheduleBill, getScheduleById } from "../api/api"; // adjust your import path
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 
@@ -10,9 +10,7 @@ const ScheduleBill = () => {
   const [billId, setBillId] = useState("");
   const [products, setProducts] = useState([]);
   const [productList, setProductList] = useState([]);
-  const [productsLoaded, setProductsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   // const [selectedProducts, setSelectedProducts] = useState({});
   // Summary input values
   // Basic fields
@@ -35,6 +33,10 @@ const ScheduleBill = () => {
   const [scheduleData, setScheduleData] = useState({});
 
   useEffect(() => {
+    const userData = sessionStorage.getItem("user");
+    if (userData) {
+      setUserId(userData?._id);
+    }
     const fetchOrCreateBill = async () => {
       setLoading(true);
       try {
@@ -211,8 +213,6 @@ const ScheduleBill = () => {
     }, 0);
 
     const perPlantCost = totalPlants > 0 ? totalCost / totalPlants : 0;
-
-    const allProducts = (scheduleData.weeks ?? []).flatMap((week) => week.products || []);
 
     // 2️⃣ Helper to calculate group cost
     const calculateGroupCost = (category) => {

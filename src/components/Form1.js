@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import bgImage from "../assets/farme.jpg";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
 import CommonAlert from "./CommonAlert";
 
 // import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -156,7 +155,7 @@ const Form1 = () => {
             },
           },
         };
-      })
+      }),
     );
   };
 
@@ -194,7 +193,7 @@ const Form1 = () => {
             },
           },
         };
-      })
+      }),
     );
   };
 
@@ -210,7 +209,7 @@ const Form1 = () => {
         }
 
         return { ...week, products: updatedProducts };
-      })
+      }),
     );
   };
 
@@ -355,7 +354,7 @@ const Form1 = () => {
             useStartDay: "",
             instructions: "",
             products: {},
-          }))
+          })),
         );
       }
     } catch (error) {

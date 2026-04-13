@@ -6,9 +6,6 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import medicine from "../assets/medicine.jpeg";
 import medicine2 from "../assets/medicine 2.jpeg";
 import medicine3 from "../assets/medicine 3.jpeg";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
