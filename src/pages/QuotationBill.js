@@ -75,8 +75,8 @@ const QuotationBill = () => {
   const { cropName, billDate, farmerInfo, items = [], additionalInfo = {} } = billData;
 
   return (
-    <div className="pt-4 px-4  mb-6 max-w-6xl mx-auto bg-white border border-green-300 rounded shadow text-sm">
-      <div className="print-area pt-4 px-4  mb-4 max-w-6xl mx-auto bg-white border-black text-sm ">
+    <div className="pt-4 px-4 mb-6 w-full print:p-2 print:mb-0 bg-white border border-green-300 rounded shadow text-sm">
+      <div className="print-area pt-4 px-4  mb-4 w-full print:w-full print:m-0 bg-white border-black text-sm ">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-green-700 flex items-center gap-2">
@@ -96,7 +96,7 @@ const QuotationBill = () => {
             <p className=" print:hidden font-bold text-right">दिनांक: {new Date(billDate).toLocaleDateString("en-GB")}</p>
           </div>
 
-          <div className="hidden print:block print-header  min-h-28 max-h-32  top-0 left-0 right-0 bg-white border-b border-gray-300">
+          <div className="hidden print:block print-header  py-2  top-0 left-0 right-0 bg-white border-b border-gray-300">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 px-6">
               {/* Left: Logo */}
               <div className="flex-shrink-0 flex items-center justify-center">
@@ -234,9 +234,7 @@ const QuotationBill = () => {
           <GroupedCost title="🔥 खेत पर पत्तों से धुवा की लागत" data={additionalInfo.smokeCost} />
         </div>
       </div>
-      <div className="hidden print:block h-5 fixed bottom-0 left-0 right-0 text-center text-xs border-t border-gray-300 bg-white py-1">
-        📍 235 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +012 345 67890
-      </div>
+      <div className="hidden print:block text-center text-xs border-t border-gray-300 mt-6 pt-2">📍 235 Gov. Press Colony DABHA, Nagpur, 440023 | ✉️ info@parnanetra.org | 📞 +012 345 67890</div>
     </div>
   );
 };

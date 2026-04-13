@@ -273,7 +273,7 @@ const QuatationGen = () => {
           </select>
         </div>
         {quotation.weeks.map((week, index) => (
-          <div key={index} className="print:table-header-group my-3 py-5 overflow-x-auto print:overflow-visible print:w-full mt-6 break-avoid">
+          <div key={index} className="print:table-header-group py-2 overflow-x-auto print:overflow-visible print:w-full mt-4 break-avoid">
             <table className="table-auto min-w-max border border-separate text-xs print:text-[14px] w-full" style={{ borderSpacing: "0 6px" }}>
               <thead className="bg-green-100 text-gray-900 ">
                 <tr>

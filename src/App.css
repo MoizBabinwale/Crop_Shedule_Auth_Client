@@ -73,6 +73,33 @@
   img {
     display: block !important;
   }
+  .page-break-block {
+    page-break-inside: avoid;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .print-area {
+    width: 100%;
+    margin: 0;
+    padding: 8px;
+  }
+
+  table {
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
 
   /* Optional: Hide scrollbars */
   @page {
