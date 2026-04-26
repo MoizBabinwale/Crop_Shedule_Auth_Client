@@ -1,7 +1,7 @@
 const translations = {
   mr: {
     printSchedule: "प्रिंट वेळापत्रक",
-    printQuotation: "कोटेशन प्रिंट",
+    printQuotation: "          📄कोटेशन प्रिंट",
     farmerDetails: "👨‍🌾 शेतकरी माहिती",
     date: "दिनांक",
 

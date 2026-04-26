@@ -271,7 +271,7 @@ export default function AdminDashboard() {
                   <th className="p-3">Role</th>
                   <th className="p-3 text-center">Quotations</th>
                   <th className="p-3">Status</th>
-                  <th className="p-3 text-center">Actions</th>
+                  {isAdmin && <th className="p-3 text-center">Actions</th>}
                 </tr>
               </thead>
 
@@ -305,45 +305,47 @@ export default function AdminDashboard() {
                         <td className="p-3">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
 
                         {/* ACTIONS */}
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            {/* Role Change */}
-                            {canChangeRole(u) && (
-                              <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm">
-                                <option value="user">User</option>
-                                <option value="subadmin">Sub Admin</option>
-                                {isAdmin && <option value="admin">Admin</option>}
-                              </select>
-                            )}
+                        {isAdmin && (
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              {/* Role Change */}
+                              {canChangeRole(u) && (
+                                <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm">
+                                  <option value="user">User</option>
+                                  <option value="subadmin">Sub Admin</option>
+                                  {isAdmin && <option value="admin">Admin</option>}
+                                </select>
+                              )}
 
-                            {/* Edit */}
-                            {canEditUser(u) && (
-                              <button onClick={() => openEditUserModal(u)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full" title="Edit User">
-                                <FaEdit size={14} />
+                              {/* Edit */}
+                              {canEditUser(u) && (
+                                <button onClick={() => openEditUserModal(u)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full" title="Edit User">
+                                  <FaEdit size={14} />
+                                </button>
+                              )}
+
+                              {/* Delete */}
+                              <button
+                                onClick={() => {
+                                  setSelectedUserId(u._id);
+                                  setSelectedUserName(u.name);
+                                  setConfirmOpen(true);
+                                }}
+                                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
+                                title="Delete User"
+                              >
+                                <FaTrash size={14} />
                               </button>
-                            )}
 
-                            {/* Delete */}
-                            <button
-                              onClick={() => {
-                                setSelectedUserId(u._id);
-                                setSelectedUserName(u.name);
-                                setConfirmOpen(true);
-                              }}
-                              className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
-                              title="Delete User"
-                            >
-                              <FaTrash size={14} />
-                            </button>
-
-                            {/* Approve */}
-                            {!u.approved && u.role !== "admin" && (
-                              <button onClick={() => approveUser(u._id)} className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full" title="Approve User">
-                                <FaCheck size={14} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
+                              {/* Approve */}
+                              {!u.approved && u.role !== "admin" && (
+                                <button onClick={() => approveUser(u._id)} className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full" title="Approve User">
+                                  <FaCheck size={14} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                 )}

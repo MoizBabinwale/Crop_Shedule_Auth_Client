@@ -78,6 +78,19 @@ const QuatationGen = () => {
     return "Apply the prepared mixture as per recommended method.";
   };
 
+  const parseQtyString = (qtyStr = "") => {
+    let ml = null;
+    let l = null;
+
+    const mlMatch = qtyStr.match(/([\d.]+)\s*ml/i);
+    if (mlMatch) ml = parseFloat(mlMatch[1]);
+
+    const lMatch = qtyStr.match(/([\d.]+)\s*(ltr|liter|लीटर)/i);
+    if (lMatch) l = parseFloat(lMatch[1]);
+
+    return { ml, l };
+  };
+
   const buildEnglishInstruction = (week) => {
     const products = Object.values(week.products || {}).filter((p) => p.categoryKey !== "leaf_smoke");
 
@@ -116,46 +129,15 @@ const QuatationGen = () => {
 
     const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} लीटर`;
 
+    // Detect the extra instruction in Hindi
+    const extraLine = detectHindiExtraInstruction(week.instructions);
+
     return {
       prefix: "",
       highlighted: `${productText} ${water}`,
-      suffix: ` पानी में मिलाकर घोल तैयार करें। ${week.instructions || ""}`,
+      // Use the extraLine instead of week.instructions
+      suffix: ` पानी में मिलाकर घोल तैयार करें। ${extraLine}`,
       totalWater: week.totalWater ? `— कुल ${week.totalWater} लीटर पानी लगेगा` : null,
-    };
-  };
-
-  const parseQtyString = (qtyStr = "") => {
-    let ml = null;
-    let l = null;
-
-    const mlMatch = qtyStr.match(/([\d.]+)\s*ml/i);
-    if (mlMatch) ml = parseFloat(mlMatch[1]);
-
-    const lMatch = qtyStr.match(/([\d.]+)\s*(ltr|liter|लीटर)/i);
-    if (lMatch) l = parseFloat(lMatch[1]);
-
-    return { ml, l };
-  };
-
-  const buildMarathiInstruction = (week) => {
-    const products = Object.values(week.products || {}).filter((p) => p.category !== "खेत पर पत्तों से धुवा");
-
-    const productText = products
-      .map((p) => {
-        const { ml, l } = parseQtyString(p.quantity);
-        if (l) return `${p.name} ${l} लीटर`;
-        if (ml) return `${p.name} ${ml} ml`;
-        return p.name;
-      })
-      .join(" आणि ");
-
-    const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} लीटर`;
-
-    return {
-      prefix: "",
-      highlighted: `${productText} ${water}`,
-      suffix: ` पाणी मध्ये मिसळून द्रावण तयार करावे. ${week.instructions || ""}`,
-      totalWater: week.totalWater ? `— एकूण ${week.totalWater} लीटर पाणी लागेल` : null,
     };
   };
 
@@ -173,10 +155,14 @@ const QuatationGen = () => {
 
     const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} લીટર`;
 
+    // Detect the extra instruction in Gujarati
+    const extraLine = detectGujaratiExtraInstruction(week.instructions);
+
     return {
       prefix: "",
       highlighted: `${productText} ${water}`,
-      suffix: ` પાણીમાં મિક્સ કરીને દ્રાવણ તૈયાર કરો. ${week.instructions || ""}`,
+      // Use the extraLine instead of week.instructions
+      suffix: ` પાણીમાં મિક્સ કરીને દ્રાવણ તૈયાર કરો. ${extraLine}`,
       totalWater: week.totalWater ? `— કુલ ${week.totalWater} લીટર પાણી લાગશે` : null,
     };
   };
@@ -187,6 +173,74 @@ const QuatationGen = () => {
     return buildMarathiInstruction(week); // default
   };
 
+  const buildMarathiInstruction = (week) => {
+    const products = Object.values(week.products || {}).filter((p) => p.category !== "खेत पर पत्तों से धुवा");
+
+    const productText = products
+      .map((p) => {
+        const { ml, l } = parseQtyString(p.quantity);
+        if (l) return `${p.name} ${l} लीटर`;
+        if (ml) return `${p.name} ${ml} ml`;
+        return p.name;
+      })
+      .join(" आणि ");
+
+    const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} लीटर`;
+
+    // Detect the extra instruction in Marathi
+    const extraLine = detectMarathiExtraInstruction(week.instructions);
+
+    return {
+      prefix: "",
+      highlighted: `${productText} ${water}`,
+      // Use the extraLine instead of week.instructions
+      suffix: ` पाणी मध्ये मिसळून द्रावण तयार करावे. ${extraLine}`,
+      totalWater: week.totalWater ? `— एकूण ${week.totalWater} लीटर पाणी लागेल` : null,
+    };
+  };
+
+  const detectMarathiExtraInstruction = (instruction = "") => {
+    const text = instruction.toLowerCase();
+
+    if (text.includes("ड्रेंचिंग") || text.includes("drenching")) {
+      return "हे द्रावण ठिबक सिंचन किंवा आळवणी (drenching) द्वारे द्यावे.";
+    }
+
+    if (text.includes("स्प्रे") || text.includes("spray") || text.includes("ड्रिप") || text.includes("drip")) {
+      return "हे द्रावण फवारणी (spray) किंवा ठिबक द्वारे द्यावे.";
+    }
+
+    return "तयार केलेले द्रावण शिफारस केलेल्या पद्धतीनुसार द्यावे.";
+  };
+
+  const detectGujaratiExtraInstruction = (instruction = "") => {
+    const text = instruction.toLowerCase();
+
+    if (text.includes("ड्रेंचिंग") || text.includes("drenching")) {
+      return "આ મિશ્રણ ડ્રિપ સિંચાઈ અથવા ડ્રેન્ચિંગ દ્વારા આપવું.";
+    }
+
+    if (text.includes("स्प्रे") || text.includes("spray") || text.includes("ड्रिप") || text.includes("drip")) {
+      return "આ મિશ્રણ છંટકાવ (spray) અથવા ડ્રિપ દ્વારા આપવું.";
+    }
+
+    return "તૈયાર કરેલ મિશ્રણ ભલામણ કરેલ પદ્ધતિ મુજબ આપવું.";
+  };
+
+  const detectHindiExtraInstruction = (instruction = "") => {
+    const text = instruction.toLowerCase();
+
+    if (text.includes("ड्रेंचिंग") || text.includes("drenching")) {
+      return "पानी में मिलाकर ड्रिप या ड्रेंचिंग के माध्यम से देना है।";
+    }
+
+    if (text.includes("स्प्रे") || text.includes("spray") || text.includes("ड्रिप") || text.includes("drip")) {
+      return "पानी में मिलाकर स्प्रे या ड्रिप के माध्यम से देना है।";
+    }
+
+    return "तैयार मिश्रण को अनुशंसित विधि के अनुसार दें।";
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8 print:p-4 print:text-lg">
       {/* Button Actions */}
@@ -195,7 +249,7 @@ const QuatationGen = () => {
           {t.printSchedule}
         </button>
         <button onClick={() => handleGenerateBill(quotation)} className="bg-yellow-400 text-black px-3 py-2 rounded hover:bg-yellow-500 text-sm">
-          📄{t.printQuotation}
+          {t.printQuotation}
         </button>
       </div>
 
@@ -277,23 +331,23 @@ const QuatationGen = () => {
             <table className="table-auto min-w-max border border-separate text-xs print:text-[14px] w-full" style={{ borderSpacing: "0 6px" }}>
               <thead className="bg-green-100 text-gray-900 ">
                 <tr>
-                  <th className="border px-2 py-2 whitespace-normal w-[50px]">{t.table.week}</th>
-                  <th className="border px-2 py-2 whitespace-normal">{t.table.date}</th>
-                  <th className="border px-2 py-2  max-w-[250px]"> {t.table.products}</th>
-                  <th className="border px-2 py-2 print:hidden  whitespace-normal"> {t.table.perLitre}</th>
-                  <th className="border px-2 py-2 whitespace-normal">{t.table.waterPerAcre}</th>
+                  <th className="border  py-2 whitespace-normal w-[15px]">{t.table.week}</th>
+                  <th className="border py-2 whitespace-nowrap w-[9%]">{t.table.date}</th>
+                  <th className="border py-2  max-w-[250px]"> {t.table.products}</th>
+                  <th className="border  py-2 print:hidden  whitespace-normal"> {t.table.perLitre}</th>
+                  <th className="border  py-2 whitespace-normal">{t.table.waterPerAcre}</th>
 
-                  <th className="border px-2 py-1 whitespace-normal">{t.table.totalWater}</th>
+                  <th className="border  py-1 whitespace-normal">{t.table.totalWater}</th>
 
-                  <th className="border px-2 py-1 max-w-[250px]">{t.table.productQty}</th>
+                  <th className="border py-1 max-w-[250px]">{t.table.productQty}</th>
 
-                  <th className="border px-2 py-1 max-w-[420px] w-[365px]">{t.table.instruction}</th>
+                  <th className="border  py-1 max-w-[350px] w-[200px]">{t.table.instruction}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="align-top">
-                  <td className="border px-2 py-1 text-center">{week.weekNumber}</td>
-                  <td className="border px-2 py-1 text-center whitespace-normal">
+                  <td className="border  py-1 text-center w-[15px]">{week.weekNumber}</td>
+                  <td className="border py-1 text-center whitespace-normal">
                     <span className="underline">
                       {week.date
                         ? new Date(week.date).toLocaleDateString("hi-IN", {
@@ -306,8 +360,8 @@ const QuatationGen = () => {
                     <br />
                     {week.useStartDay ? `${week.useStartDay}` : ""}
                   </td>
-                  <td className="border px-2 py-1 break-words">
-                    <ul className="list-disc pl-4 space-y-1  max-w-[250px]">
+                  <td className="border px-2 py-1 break-words w-[60px] max-w-[100px]">
+                    <ul className="list-disc pl-4 space-y-1  ">
                       {(week.products || []).map((prod, i) => (
                         <li key={i}>
                           <span className="font-medium">{prod.name}</span>
@@ -315,7 +369,7 @@ const QuatationGen = () => {
                       ))}
                     </ul>
                   </td>
-                  <td className="border px-2 py-1 print:hidden  break-words">
+                  <td className="border px-2 py-1 print:hidden  break-words w-[90px] max-w-[150px] ">
                     {(week.products || []).map((prod, i) =>
                       prod.perLitreMix ? (
                         <div key={i} className="text-green-800">
@@ -324,25 +378,24 @@ const QuatationGen = () => {
                       ) : null,
                     )}
                   </td>
-                  <td className="border px-2 py-1 text-center">{week.waterPerAcre} ltr</td>
+                  <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{week.waterPerAcre} ltr</td>
                   {/* <td className="border px-2 py-1 text-center">{week.totalAcres}</td> */}
-                  <td className="border px-2 py-1 text-center">{week.totalWater} लीटर </td>
-                  <td className="border px-2 py-1 break-words">
-                    <ul className="list-disc pl-4 space-y-1  max-w-[250px]">
+                  <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{week.totalWater} लीटर </td>
+                  <td className="border px-2 py-1 break-words w-[65px] max-w-[100px]">
+                    <ul className=" space-y-1  max-w-[250px]">
                       {(week.products || []).map((prod, i) => (
                         <li key={i}>
-                          <span className="font-medium">{prod.name}</span>: {prod.quantity.split("&")[0]}
+                          <span className="font-medium">{prod.name}</span>:<br /> {prod.quantity.split("&")[0]}
                         </li>
                       ))}
                     </ul>
                   </td>
-                  <td className="border px-2 py-1 max-w-[250px] break-words">
+                  <td className="border px-2 py-1 w-[200px]  break-words">
                     {week.products &&
                       (() => {
                         const text = buildInstructionByLanguage(week, language);
-
                         return (
-                          <p className="text-sm text-green-900 leading-relaxed">
+                          <p className=" text-green-900 leading-relaxed">
                             {text.prefix}
                             <span className="font-bold">{text.highlighted}</span>
                             {text.suffix}
