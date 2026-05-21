@@ -327,9 +327,9 @@ const QuatationGen = () => {
           </select>
         </div>
         {quotation.weeks.map((week, index) => (
-          <div key={index} className="print:table-header-group py-2 overflow-x-auto print:overflow-visible print:w-full mt-4 break-avoid">
+          <div key={index} className="py-2 overflow-x-auto print:overflow-visible print:w-full mt-4 break-inside-avoid">
             <table className="table-auto min-w-max border border-separate text-xs print:text-[14px] w-full" style={{ borderSpacing: "0 6px" }}>
-              <thead className="bg-green-100 text-gray-900 ">
+              <thead className="bg-green-100 text-gray-900 print:table-header-group">
                 <tr>
                   <th className="border  py-2 whitespace-normal w-[15px]">{t.table.week}</th>
                   <th className="border py-2 whitespace-nowrap w-[9%]">{t.table.date}</th>
