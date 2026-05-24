@@ -1,5 +1,5 @@
 import React from "react";
-import leaf from "../assets/leaf-logo.jpg"; // 👈 adjust path as per your structure
+import leaf from "../assets/leaf-logo.png"; // 👈 adjust path as per your structure
 
 const Loading = () => {
   return (

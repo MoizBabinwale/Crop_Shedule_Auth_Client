@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createQuotationBill, getQuotationById } from "../api/api";
+import { createQuotationBill, getQuotationById, removeCalendarSync } from "../api/api";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import translations from "../utils/translations";
+import { useAuth } from "../context/AuthContext";
 
 import logo from "../assets/logo.jpg";
 
@@ -14,6 +15,9 @@ const QuatationGen = () => {
   const [language, setLanguage] = useState("mr"); // "mr" | "en"
   const t = translations[language] || translations.mr;
 
+  const [removingCalendar, setRemovingCalendar] = useState(false);
+
+  const { auth } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     const fetchQuotation = async () => {
@@ -241,10 +245,52 @@ const QuatationGen = () => {
     return "तैयार मिश्रण को अनुशंसित विधि के अनुसार दें।";
   };
 
+  const handleRemoveCalendar = async (quotationId) => {
+    try {
+      setRemovingCalendar(true);
+
+      await removeCalendarSync(quotationId);
+
+      toast.success("Calendar events removed");
+
+      // refresh quotation data
+      window.location.reload();
+    } catch (err) {
+      console.log(err);
+
+      toast.error("Failed to remove calendar events");
+    } finally {
+      setRemovingCalendar(false);
+    }
+  };
+  const handleGoogleCalendarConnect = () => {
+    window.location.href = `http://localhost:5000/auth/google?userId=${auth.user._id}&quotationId=${quotation._id}&redirect=/schedule/quotation/${quotation._id}`;
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8 print:p-4 print:text-lg">
       {/* Button Actions */}
       <div className="flex flex-col sm:flex-row justify-end mb-4 print:hidden gap-3 sm:gap-10">
+        {quotation.weeks?.some((week) => week.googleEventId) ? (
+          <button
+            onClick={() => handleRemoveCalendar(quotation._id)}
+            disabled={removingCalendar}
+            className={`
+    px-4
+    py-2
+    rounded-lg
+    text-white
+    transition
+    ${removingCalendar ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"}
+  `}
+          >
+            {removingCalendar ? "Unsyncing..." : "Unsync Calendar"}
+          </button>
+        ) : (
+          <button onClick={handleGoogleCalendarConnect} className="    flex    items-center gap-2    bg-green-600    hover:bg-green-700    text-white    px-4    py-2    rounded-lg    transition">
+            📅 Verify Email & Sync Calendar
+          </button>
+        )}
         <button onClick={() => window.print()} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow text-sm">
           {t.printSchedule}
         </button>

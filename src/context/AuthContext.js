@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
 
 const AuthContext = createContext();
 
@@ -8,6 +10,7 @@ export function AuthProvider({ children }) {
     user: null,
     token: null,
     loading: true,
+    googleAccessToken: null,
   });
 
   useEffect(() => {
@@ -18,11 +21,12 @@ export function AuthProvider({ children }) {
 
       setAuth({
         ...parsed,
-        loading: false, // ✅ ensure loading is false
+        loading: false,
       });
     } else {
       const token = sessionStorage.getItem("token");
       const user = sessionStorage.getItem("user");
+      const googleAccessToken = sessionStorage.getItem("googleAccessToken");
 
       if (token && user) {
         setAuth({
@@ -30,6 +34,7 @@ export function AuthProvider({ children }) {
           token,
           user: JSON.parse(user),
           loading: false,
+          googleAccessToken,
         });
       } else {
         setAuth({
@@ -37,20 +42,18 @@ export function AuthProvider({ children }) {
           token: null,
           user: null,
           loading: false,
+          googleAccessToken: null,
         });
       }
     }
   }, []);
 
-  // Persist auth to sessionStorage whenever it changes
   useEffect(() => {
     if (auth.token) {
       const { loading, ...persistedAuth } = auth;
       sessionStorage.setItem("authState", JSON.stringify(persistedAuth));
     } else {
       sessionStorage.removeItem("authState");
-      // sessionStorage.removeItem("token");
-      // sessionStorage.removeItem("user");
     }
   }, [auth]);
 
@@ -60,19 +63,48 @@ export function AuthProvider({ children }) {
       token,
       user,
       loading: false,
+      googleAccessToken: null,
     });
   };
 
+  const loginUserWithGoogle = (token, user, googleAccessToken) => {
+    setAuth({
+      isLoggedIn: true,
+      token,
+      user,
+      loading: false,
+      googleAccessToken,
+    });
+    sessionStorage.setItem("googleAccessToken", googleAccessToken);
+  };
+
   const logout = () => {
+    sessionStorage.clear();
+
     setAuth({
       isLoggedIn: false,
       token: null,
       user: null,
       loading: false,
+      googleAccessToken: null,
     });
+
+    window.location.href = "/login";
   };
 
-  return <AuthContext.Provider value={{ auth, loginUser, logout, setAuth }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        auth,
+        loginUser,
+        loginUserWithGoogle,
+        logout,
+        setAuth,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);

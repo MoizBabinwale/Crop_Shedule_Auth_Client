@@ -142,7 +142,19 @@ export const getSchedulesByCropId = async (cropId) => {
 // QUOTATION APIS
 export const createQuotation = async (quotationData) => {
   try {
-    const response = await axios.post(`${BASE_URL}/quotations`, quotationData);
+    const token = sessionStorage.getItem("token");
+    const response = await axios.post(
+      `${BASE_URL}/quotations`,
+
+      quotationData,
+
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
     return response.data;
   } catch (error) {
     console.error("Error creating quotation:", error);
@@ -401,10 +413,39 @@ export const updateProfile = async (userData, userId) => {
 export const getMyQuotationCount = async () => {
   const token = sessionStorage.getItem("token");
 
-  const res = await axios.get(BASE_URL + `/quotations/count/my`, {
+  const res = await axios.get(BASE_URL + `/quotations/count/quotaionCount`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
   return res.data;
+};
+
+export const removeCalendarSync = async (quotationId) => {
+  const token = sessionStorage.getItem("token");
+
+  const res = await axios.delete(
+    `${BASE_URL}/quotations/${quotationId}/calendar-sync`,
+
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return res.data;
+};
+
+export const getCropDatawithBillStatus = async () => {
+  try {
+    const res = await axios.get(`${BASE_URL}/crop/with-bill-status`);
+    if (res) {
+      return res.data;
+    }
+    return res;
+  } catch (error) {
+    console.error("Error ", error);
+    return error;
+  }
 };

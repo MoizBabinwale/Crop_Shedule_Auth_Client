@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { BASE_URL } from "../config/baseURL";
+import { BASE_URL, googleBaseURL } from "../config/baseURL";
 import { useNavigate } from "react-router-dom";
 import { IoMdEye } from "react-icons/io";
 import { IoIosEyeOff } from "react-icons/io";
@@ -29,8 +29,7 @@ export default function AuthPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const { loginUser } = useAuth();
-
+  const { loginUser, loginUserWithGoogle } = useAuth();
   // LOGIN
   const handleLogin = async () => {
     try {
@@ -113,6 +112,38 @@ export default function AuthPage() {
           <button onClick={isLogin ? handleLogin : handleRegister} className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold">
             {isLogin ? "Login" : "Register"}
           </button>
+
+          {isLogin && (
+            <>
+              <div className="flex items-center my-4">
+                <div className="flex-1 border-t border-gray-300"></div>
+                <span className="px-3 text-gray-500 text-sm">or</span>
+                <div className="flex-1 border-t border-gray-300"></div>
+              </div>
+
+              <button
+                onClick={() => {
+                  window.location.href = `${googleBaseURL}/auth/google`;
+                }}
+                className="
+    bg-white
+    border
+    px-4
+    py-3
+    rounded-lg
+    w-full
+    shadow
+    flex
+    items-center
+    justify-center
+    gap-3
+  "
+              >
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="google" className="w-5 h-5" />
+                Continue with Google
+              </button>
+            </>
+          )}
 
           <p className="text-center mt-4">
             <button className="text-green-700 underline" onClick={() => setIsLogin(!isLogin)}>

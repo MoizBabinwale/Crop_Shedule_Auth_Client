@@ -21,6 +21,7 @@ import AuthPage from "../pages/AuthPage.jsx";
 import CreateQuotation from "../pages/CreateQuotation.js";
 import Notification from "../pages/Notifications.jsx";
 import PublicRoute from "./PublicRoute.jsx";
+import GoogleSuccess from "../pages/GoogleSuccess.js";
 
 const AllRoutes = () => {
   return (
@@ -128,6 +129,7 @@ const AllRoutes = () => {
         }
       />
 
+      <Route path="/google-success" element={<GoogleSuccess />} />
       {/* MUST BE LAST */}
       <Route path="*" element={<AuthPage />} />
     </Routes>

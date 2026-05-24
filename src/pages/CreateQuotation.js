@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { addCropData, copyCrop, createQuotation, deleteCropById, editCropData, getCropById, getCropData, getSchedulesByCropId } from "../api/api";
+import { addCropData, copyCrop, createQuotation, deleteCropById, editCropData, getCropById, getCropData, getCropDatawithBillStatus, getSchedulesByCropId } from "../api/api";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { confirmAlert } from "react-confirm-alert";
@@ -11,6 +11,8 @@ import leaf from "../assets/Greenleaf.png";
 import { useRef } from "react";
 import { FaCopy } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { syncQuotationToGoogleCalendar } from "../utils/googleCalendar";
+import { useAuth } from "../context/AuthContext";
 
 function CropList() {
   const [cropList, setCropList] = useState([]);
@@ -19,10 +21,10 @@ function CropList() {
   const [newCrop, setNewCrop] = useState({ name: "", description: "", weeks: "" });
   const [editCropId, setEditCropId] = useState(null);
   const [loading, setLoading] = useState(false);
-  // const [acreValue, setAcreValue] = useState(0);
   const [acreValues, setAcreValues] = useState({});
 
   const navigate = useNavigate();
+  const { auth } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [selectedScheduleId, setSelectedScheduleId] = useState(false);
   const [selectedCropId, setSelectedCropId] = useState("");
@@ -44,37 +46,18 @@ function CropList() {
   }, []);
 
   const fetchCrops = async () => {
-    const res = await getCropData();
-    if (res.data) {
-      const cropsWithBillStatus = await Promise.all(
-        res.data.map(async (crop) => {
-          try {
-            const schedule = await getSchedulesByCropId(crop._id); // Assuming one schedule per crop
-            if (schedule && schedule.scheduleBillId) {
-              return { ...crop, scheduleId: schedule._id, hasBill: true };
-            }
-          } catch (err) {
-            console.error("Error fetching schedule for crop", crop._id, err);
-          }
-          return { ...crop, hasBill: false };
-        })
-      );
+    try {
+      setLoading(true);
 
-      setCropList(cropsWithBillStatus);
-      setLoading(false);
-    } else {
-      toast.warning("Unable to fetch Data!", {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        theme: "light",
-        // transition: Bounce,
-      });
-      setLoading(false);
+      const res = await getCropDatawithBillStatus();
+      setCropList(res || []);
+    } catch (err) {
+      console.log(err);
+
+      toast.warning("Unable to fetch Data!");
       setCropList([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -204,9 +187,11 @@ function CropList() {
     try {
       const loggedInUser = JSON.parse(sessionStorage.getItem("user"));
 
-      farmerData = {
+      const updatedFarmerData = {
         ...farmerInfo,
-        _id: loggedInUser._id, // ✅ add this
+        _id: loggedInUser._id,
+        email: loggedInUser.email,
+        number: loggedInUser.number,
       };
 
       const crop = await getCropById(cropId);
@@ -216,10 +201,8 @@ function CropList() {
       const acres = Number(acreValue);
       const allProducts = (schedule.weeks || []).flatMap((week) => week.products || []);
 
-      // 🗓️ Selected new start date by user
       const newStartDate = farmerData.startDate ? new Date(farmerData.startDate) : null;
 
-      // 🗓️ Compute date intervals (differences in days between each original week)
       let dateDiffs = [];
       if (schedule.weeks.length > 1) {
         for (let i = 1; i < schedule.weeks.length; i++) {
@@ -230,28 +213,24 @@ function CropList() {
         }
       }
 
-      // 🧮 Build updatedWeeks with shifted dates
       const updatedWeeks = schedule.weeks.map((week, index) => {
         let newWeekDate;
 
         if (newStartDate) {
           if (index === 0) {
-            // First week = selected start date
             newWeekDate = new Date(newStartDate);
           } else {
-            // Add previous intervals cumulatively
             const daysToAdd = dateDiffs.slice(0, index).reduce((sum, d) => sum + d, 0);
             newWeekDate = new Date(newStartDate);
             newWeekDate.setDate(newStartDate.getDate() + daysToAdd);
           }
         } else {
-          // fallback: use original date if startDate not selected
           newWeekDate = new Date(week.date);
         }
 
         return {
           ...week,
-          date: newWeekDate.toISOString().split("T")[0], // Keep in YYYY-MM-DD format
+          date: newWeekDate.toISOString().split("T")[0],
           totalWater: String(acres * Number(week.waterPerAcre || 0)),
           totalAcres: String(acres),
           productAmountMg: String(acres * Number(week.productAmountMg || 0)),
@@ -282,12 +261,16 @@ function CropList() {
         cropName: crop.name,
         acres,
         weeks: updatedWeeks,
-        farmerInfo: farmerData,
+        farmerInfo: updatedFarmerData,
         scheduleId: selectedScheduleId,
       };
 
       const res = await createQuotation(quotationPayload);
-      toast.success("Quotation created successfully");
+      if (res) {
+        console.log("Created quotation ", res);
+        toast.success("Quotation created successfully");
+      }
+
       setLoading(false);
       setAcreValues({});
       setFarmerInfo({
