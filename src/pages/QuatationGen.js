@@ -7,6 +7,7 @@ import translations from "../utils/translations";
 import { useAuth } from "../context/AuthContext";
 
 import logo from "../assets/logo.jpg";
+import { googleBaseURL } from "../config/baseURL";
 
 const QuatationGen = () => {
   const { quatationId } = useParams();
@@ -264,7 +265,7 @@ const QuatationGen = () => {
     }
   };
   const handleGoogleCalendarConnect = () => {
-    window.location.href = `http://localhost:5000/auth/google?userId=${auth.user._id}&quotationId=${quotation._id}&redirect=/schedule/quotation/${quotation._id}`;
+    window.location.href = `${googleBaseURL}/auth/google?userId=${auth.user._id}&quotationId=${quotation._id}&redirect=/schedule/quotation/${quotation._id}`;
   };
 
   return (
