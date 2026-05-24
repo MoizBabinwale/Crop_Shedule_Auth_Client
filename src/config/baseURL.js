@@ -10,3 +10,4 @@ export const LIVE_BASE_URL = "https://crop-shedule-server-auth.vercel.app/api";
 export const BASE_URL = LIVE_BASE_URL;
 
 export const googleBaseURL = "https://crop-shedule-server-auth.vercel.app";
+// export const googleBaseURL = "http://localhost:5000";

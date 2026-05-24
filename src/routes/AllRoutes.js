@@ -24,6 +24,7 @@ import PublicRoute from "./PublicRoute.jsx";
 import GoogleSuccess from "../pages/GoogleSuccess.js";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import TermsConditions from "../pages/TermsConditions";
+import PendingApproval from "../pages/PendingApproval.jsx";
 
 const AllRoutes = () => {
   return (
@@ -66,6 +67,9 @@ const AllRoutes = () => {
           </PublicRoute>
         }
       />
+
+      {/* PENDING APPROVAL PAGE */}
+      <Route path="/pending" element={<PendingApproval />} />
 
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 import { BASE_URL } from "../config/baseURL";
+import Loading from "../components/Loading";
 
 export default function GoogleSuccess() {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ export default function GoogleSuccess() {
         text-green-700
       "
     >
-      Logging you in...
+      <Loading />
     </div>
   );
 }
