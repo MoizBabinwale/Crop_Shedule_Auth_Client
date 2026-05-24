@@ -47,11 +47,20 @@ const Footer = () => {
               </Link>
             </li>
 
-            <li>
-              <a href="#" className="hover:underline">
-                → Our Services
-              </a>
-            </li>
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Legal</h2>
+              <li>
+                <Link to="/privacy-policy" className="hover:underline">
+                  → Privacy Policy
+                </Link>
+              </li>
+
+              <li>
+                <Link to="/terms-and-conditions" className="hover:underline">
+                  → Terms & Conditions
+                </Link>
+              </li>
+            </div>
             <li>
               <Link to="https://logixious.com/" target="_blank" rel="noopener noreferrer" className="hover:underline">
                 → logixious

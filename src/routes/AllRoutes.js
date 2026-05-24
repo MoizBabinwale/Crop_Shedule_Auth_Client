@@ -22,6 +22,8 @@ import CreateQuotation from "../pages/CreateQuotation.js";
 import Notification from "../pages/Notifications.jsx";
 import PublicRoute from "./PublicRoute.jsx";
 import GoogleSuccess from "../pages/GoogleSuccess.js";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
+import TermsConditions from "../pages/TermsConditions";
 
 const AllRoutes = () => {
   return (
@@ -119,6 +121,9 @@ const AllRoutes = () => {
       <Route path="/scheduleBill/view/:scheduleId" element={<ScheduleBillView />} />
       <Route path="/quotationBill/view/:quotationId" element={<QuotationBill />} />
       <Route path="/gallery" element={<GalleryPage />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+      <Route path="/terms-and-conditions" element={<TermsConditions />} />
       <Route
         path="/notifications"
         element={
