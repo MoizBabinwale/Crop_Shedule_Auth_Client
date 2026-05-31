@@ -36,7 +36,8 @@ const ScheduleBill = () => {
   useEffect(() => {
     const userData = sessionStorage.getItem("user");
     if (userData) {
-      setUserId(userData?._id);
+      const parsedUser = JSON.parse(userData);
+      setUserId(parsedUser?._id);
     }
     const fetchOrCreateBill = async () => {
       setLoading(true);

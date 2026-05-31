@@ -55,7 +55,9 @@ const Home = () => {
               <p className="text-sm font-black uppercase tracking-normal text-green-700">Workflows</p>
               <h2 className="mt-2 text-3xl font-black text-slate-950 sm:text-4xl">Everything farmers and admins need</h2>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base">Responsive screens, quicker actions, and clear navigation across field planning, billing, quotation, and user management.</p>
+            <p className="max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+              Responsive screens, quicker actions, and clear navigation across field planning, billing, quotation, and user management.
+            </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

@@ -338,7 +338,11 @@ const QuatationGen = () => {
     }
   };
   const handleGoogleCalendarConnect = () => {
-    window.location.href = `${BACKEND_BASE_URL}/auth/google?userId=${auth.user._id}&quotationId=${quotation._id}&redirect=/schedule/quotation/${quotation._id}`;
+    if (!auth?.user?._id) {
+      toast.error("User data not loaded yet. Please try again.");
+      return;
+    }
+    window.location.href = `${BACKEND_BASE_URL}/auth/google?userId=${auth.user._id}&quotationId=${quotation?._id}&redirect=/schedule/quotation/${quotation?._id}`;
   };
 
   return (
@@ -385,7 +389,7 @@ const QuatationGen = () => {
         {/* Header */}
         <div className="flex items-start gap-4 px-4 py-2 print:gap-2 print:px-1 print:py-0">
           {/* ✅ Logo (VISIBLE EVERYWHERE) */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 hidden md:block">
             <img src={logo} alt="Parnanetra Logo" className="h-16 w-auto object-contain print:h-12" />
           </div>
 
@@ -399,37 +403,39 @@ const QuatationGen = () => {
             </div>
 
             {/* Farmer Info */}
-            <table className="w-full text-sm border-collapse print:text-[12px]">
-              <tbody>
-                <tr>
-                  <td className="font-semibold w-1/4">{t.farmer.name}:</td>
-                  <td className="w-1/4">{quotation.farmerInfo?.name || "-"}</td>
-                  <td className="font-semibold w-1/4">{t.farmer.number}:</td>
-                  <td className="w-1/4">{quotation.farmerInfo?.number || "-"}</td>
-                </tr>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse print:text-[12px]">
+                <tbody>
+                  <tr className="block sm:table-row border-b sm:border-0">
+                    <td className="font-semibold block sm:table-cell py-1">{t.farmer.name}:</td>
+                    <td className="block sm:table-cell py-1">{quotation.farmerInfo?.name || "-"}</td>
+                    <td className="font-semibold block sm:table-cell py-1">{t.farmer.number}:</td>
+                    <td className="block sm:table-cell py-1">{quotation.farmerInfo?.number || "-"}</td>
+                  </tr>
 
-                <tr>
-                  <td className="font-semibold">{t.farmer.email}:</td>
-                  <td>{quotation.farmerInfo?.email || "-"}</td>
-                  <td className="font-semibold">{t.farmer.place}:</td>
-                  <td>{quotation.farmerInfo?.place || "-"}</td>
-                </tr>
+                  <tr className="block sm:table-row border-b sm:border-0">
+                    <td className="font-semibold block sm:table-cell py-1">{t.farmer.email}:</td>
+                    <td className="block sm:table-cell py-1">{quotation.farmerInfo?.email || "-"}</td>
+                    <td className="font-semibold block sm:table-cell py-1">{t.farmer.place}:</td>
+                    <td className="block sm:table-cell py-1">{quotation.farmerInfo?.place || "-"}</td>
+                  </tr>
 
-                <tr>
-                  <td className="font-semibold">{t.farmer.tahsil}:</td>
-                  <td>{quotation.farmerInfo?.tahsil || "-"}</td>
-                  <td className="font-semibold">{t.farmer.district}:</td>
-                  <td>{quotation.farmerInfo?.district || "-"}</td>
-                </tr>
+                  <tr className="block sm:table-row border-b sm:border-0">
+                    <td className="font-semibold block sm:table-cell py-1">{t.farmer.tahsil}:</td>
+                    <td className="block sm:table-cell py-1">{quotation.farmerInfo?.tahsil || "-"}</td>
+                    <td className="font-semibold block sm:table-cell py-1">{t.farmer.district}:</td>
+                    <td className="block sm:table-cell py-1">{quotation.farmerInfo?.district || "-"}</td>
+                  </tr>
 
-                <tr>
-                  <td className="font-semibold">{t.farmer.state}:</td>
-                  <td>{quotation.farmerInfo?.state || "-"}</td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
+                  <tr className="block sm:table-row">
+                    <td className="font-semibold block sm:table-cell py-1">{t.farmer.state}:</td>
+                    <td className="block sm:table-cell py-1">{quotation.farmerInfo?.state || "-"}</td>
+                    <td className="hidden sm:table-cell"></td>
+                    <td className="hidden sm:table-cell"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         {/* Farmer Info */}
@@ -536,6 +542,61 @@ const QuatationGen = () => {
             </table>
           </div>
         ))}
+
+        {/* Mobile View */}
+        <div className="block md:hidden space-y-4">
+          {quotation.weeks.map((week, index) => (
+            <div key={index} className="bg-white border rounded-lg shadow-sm p-4">
+              <div className="flex justify-between mb-2">
+                <span className="font-bold text-green-700">Week {week.weekNumber}</span>
+
+                <span className="text-sm">{week.date ? new Date(week.date).toLocaleDateString("hi-IN") : "-"}</span>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <p>
+                  <strong>{t.table.waterPerAcre}:</strong> {week.waterPerAcre} Ltr
+                </p>
+
+                <p>
+                  <strong>{t.table.totalWater}:</strong> {week.totalWater} Ltr
+                </p>
+
+                <div>
+                  <strong>{t.table.products}:</strong>
+
+                  <ul className="list-disc pl-5 mt-1">
+                    {week.products?.map((prod, i) => (
+                      <li key={i}>{prod.name}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <strong>{t.table.productQty}:</strong>
+
+                  <ul className="mt-1 space-y-1">
+                    {week.products?.map((prod, i) => (
+                      <li key={i}>
+                        {prod.name}: {prod.quantity.split("&")[0]}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <strong>{t.table.instruction}:</strong>
+
+                  <p className="mt-1 text-gray-700">
+                    {buildInstructionByLanguage(week, language).prefix}
+                    <span className="font-bold">{buildInstructionByLanguage(week, language).highlighted}</span>
+                    {buildInstructionByLanguage(week, language).suffix}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
         {/* print:fixed print:bottom-0 print:left-0 print:right-0 */}
         <div className="hidden print:block fixed bottom-0 left-0 right-0 text-center text-xs border-t border-gray-300 bg-white py-1">
           📍 235 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +012 345 67890

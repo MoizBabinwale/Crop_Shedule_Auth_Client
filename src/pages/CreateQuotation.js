@@ -190,9 +190,9 @@ function CropList() {
 
       const updatedFarmerData = {
         ...farmerInfo,
-        _id: loggedInUser._id,
-        email: loggedInUser.email,
-        number: loggedInUser.number,
+        _id: loggedInUser?._id || "",
+        email: loggedInUser?.email || "",
+        number: loggedInUser?.number || "",
       };
 
       const crop = await getCropById(cropId);

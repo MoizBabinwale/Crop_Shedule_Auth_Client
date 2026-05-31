@@ -45,7 +45,7 @@ const Navbar = () => {
       <div className="container-pro px-4">
         <div className="flex h-20 items-center justify-between gap-4">
           <Link to="/" className="flex min-w-0 items-center gap-3" onClick={() => setMenuOpen(false)}>
-            <img src={logo} alt="Parnanetra logo" className="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-green-900/10" />
+            <img src={logo} alt="Parnanetra logo" className="h-12 w-12 shrink-0 rounded-xl object-contain ring-1 ring-green-900/10" />
             <div className="min-w-0">
               <p className="truncate text-base font-black leading-tight text-green-900 sm:text-lg">Parnanetra Ayurvedic</p>
               <p className="truncate text-xs font-semibold text-amber-600">Agro System since 1988</p>
@@ -57,9 +57,7 @@ const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
-                  isActive(link.to) ? "bg-green-700 text-white shadow-sm" : "text-slate-700 hover:bg-green-50 hover:text-green-800"
-                }`}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${isActive(link.to) ? "bg-green-700 text-white shadow-sm" : "text-slate-700 hover:bg-green-50 hover:text-green-800"}`}
               >
                 {link.label}
               </Link>
@@ -68,7 +66,11 @@ const Navbar = () => {
 
           <div className="hidden items-center gap-3 lg:flex">
             {showBell && (
-              <button onClick={() => navigate("/notifications")} className="relative rounded-full border border-green-900/10 bg-green-50 p-2.5 text-green-800 transition hover:bg-green-100" aria-label="Notifications">
+              <button
+                onClick={() => navigate("/notifications")}
+                className="relative rounded-full border border-green-900/10 bg-green-50 p-2.5 text-green-800 transition hover:bg-green-100"
+                aria-label="Notifications"
+              >
                 <Bell size={19} />
                 {unreadCount > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white">{unreadCount}</span>}
               </button>
@@ -103,7 +105,11 @@ const Navbar = () => {
             )}
           </div>
 
-          <button onClick={() => setMenuOpen((value) => !value)} className="grid h-11 w-11 place-items-center rounded-xl border border-green-900/10 bg-green-50 text-green-900 lg:hidden" aria-label="Open menu">
+          <button
+            onClick={() => setMenuOpen((value) => !value)}
+            className="grid h-11 w-11 place-items-center rounded-xl border border-green-900/10 bg-green-50 text-green-900 lg:hidden"
+            aria-label="Open menu"
+          >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
