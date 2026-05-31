@@ -1,13 +1,12 @@
 // src/config/baseURL.js
 
-export const LOCAL_BASE_URL = "http://localhost:5000/api";
+export const LOCAL_BASE_URL = "http://localhost:5000";
 
 // LIVE / PRODUCTION BASE URL
-export const LIVE_BASE_URL = "https://crop-shedule-server-auth.vercel.app/api";
+export const LIVE_BASE_URL = "https://crop-shedule-server-auth.vercel.app";
 
 // Choose which one to use (easy switching)
-// export const BASE_URL = LOCAL_BASE_URL;
-export const BASE_URL = LIVE_BASE_URL;
+// export const BACKEND_BASE_URL = LOCAL_BASE_URL;
+export const BACKEND_BASE_URL = LIVE_BASE_URL;
 
-export const googleBaseURL = "https://crop-shedule-server-auth.vercel.app";
-// export const googleBaseURL = "http://localhost:5000";
+export const BASE_URL = `${BACKEND_BASE_URL}/api`;

@@ -1,204 +1,155 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Bell, ChevronDown, LayoutDashboard, LogIn, LogOut, Menu, User, X } from "lucide-react";
 import logo from "../assets/logo.jpg";
 import { useAuth } from "../context/AuthContext";
-import { Bell } from "lucide-react";
-
 import { useNotifications } from "../context/NotificationContext";
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const [profileOpen, setProfileOpen] = useState(false);
   const { logout, auth } = useAuth();
-  const token = sessionStorage.getItem("token"); // check login
+  const { notifications } = useNotifications();
 
   const navLinks = [
-    { to: "/", label: "HOME", visible: true },
-    { to: "/about", label: "ABOUT", visible: true },
-    { to: "/products", label: "PRODUCT", visible: true, visible: auth?.user && auth.user?.role !== "user" },
-
-    // 🔥 Only show for admin + subadmin
+    { to: "/", label: "Home", visible: true },
+    { to: "/about", label: "About", visible: true },
+    { to: "/products", label: "Products", visible: auth?.user && auth.user?.role !== "user" },
     {
       to: "/quotation/master",
-      label: auth?.user?.role === "user" ? "VIEW QUOTATIONS" : "QUOTATION MASTER",
-      visible: true,
+      label: auth?.user?.role === "user" ? "Quotations" : "Quotation Master",
+      visible: auth?.isLoggedIn,
     },
-
-    { to: "/quotation/createQuotation", label: "GENERATE QUOTATION ", visible: auth?.user && auth.user?.role === "user" },
-
-    { to: "/contact", label: "CONTACT", visible: true },
+    { to: "/quotation/createQuotation", label: "Generate", visible: auth?.user && auth.user?.role === "user" },
+    { to: "/contact", label: "Contact", visible: true },
   ];
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const showBell = !auth.loading && auth.isLoggedIn && (auth.user?.role === "admin" || auth.user?.role === "subadmin");
+  const firstLetter = auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : "?";
 
   const isActive = (path) => location.pathname === path;
 
-  const [profileOpen, setProfileOpen] = React.useState(false);
-
-  const firstLetter = auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : "?";
-
   const goToDashboard = () => {
-    if (auth.user.role === "admin" || auth.user.role === "subadmin") {
-      navigate("/admin");
-    } else {
-      navigate("/user");
-    }
+    navigate(auth.user?.role === "admin" || auth.user?.role === "subadmin" ? "/admin" : "/user");
+    setMenuOpen(false);
     setProfileOpen(false);
   };
 
-  const { notifications } = useNotifications();
-
-  // ✅ NOW THIS MAKES SENSE
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const showBell = !auth.loading && auth.isLoggedIn && (auth.user?.role === "admin" || auth.user?.role === "subadmin");
+  const visibleLinks = navLinks.filter((link) => link.visible);
 
   return (
-    <nav className="bg-[#3BB149] text-white print:hidden">
-      {/* Desktop Navbar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20 px-4">
-          {/* Logo + Title */}
-          <div className="flex items-center space-x-3">
-            <img src={logo} alt="logo" className="h-14 w-auto object-contain" />
-            <div className="text-white">
-              <Link to="/">
-                <div className="text-lg md:text-xl font-bold leading-tight">
-                  <span className="text-white-600">Parnanetra</span> Ayurvedic Agro System
-                </div>
-                <div className="text-sm italic text-[#FFD580]">... since 1988</div>
-              </Link>
+    <header className="sticky top-0 z-50 border-b border-green-900/10 bg-white/95 text-slate-900 shadow-sm backdrop-blur print:hidden">
+      <div className="container-pro px-4">
+        <div className="flex h-20 items-center justify-between gap-4">
+          <Link to="/" className="flex min-w-0 items-center gap-3" onClick={() => setMenuOpen(false)}>
+            <img src={logo} alt="Parnanetra logo" className="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-green-900/10" />
+            <div className="min-w-0">
+              <p className="truncate text-base font-black leading-tight text-green-900 sm:text-lg">Parnanetra Ayurvedic</p>
+              <p className="truncate text-xs font-semibold text-amber-600">Agro System since 1988</p>
             </div>
-          </div>
+          </Link>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex space-x-4 items-center">
-            {navLinks
+          <nav className="hidden items-center gap-1 lg:flex">
+            {visibleLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                  isActive(link.to) ? "bg-green-700 text-white shadow-sm" : "text-slate-700 hover:bg-green-50 hover:text-green-800"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
-              .filter((link) => link.visible)
-              .map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`px-4 py-2 rounded text-sm font-semibold uppercase transition duration-300 
-                  ${isActive(link.to) ? "bg-[#FFA534]" : "hover:bg-[#FFA534]"}
-                `}
-                >
-                  {link.label}
-                </Link>
-              ))}
+          <div className="hidden items-center gap-3 lg:flex">
+            {showBell && (
+              <button onClick={() => navigate("/notifications")} className="relative rounded-full border border-green-900/10 bg-green-50 p-2.5 text-green-800 transition hover:bg-green-100" aria-label="Notifications">
+                <Bell size={19} />
+                {unreadCount > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white">{unreadCount}</span>}
+              </button>
+            )}
 
-            {/* ✅ LOGIN / LOGOUT BUTTON */}
-            {/* PROFILE + LOGOUT DROPDOWN */}
             {auth.isLoggedIn ? (
-              <div className="relative" onMouseEnter={() => setProfileOpen(true)} onMouseLeave={() => setProfileOpen(false)}>
-                <button className="w-10 h-10 rounded-full bg-white text-[#3BB149] font-bold flex items-center justify-center text-lg border-2 border-white hover:bg-[#FFA534] hover:text-white transition">
-                  {firstLetter}
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen((value) => !value)}
+                  className="flex items-center gap-2 rounded-full border border-green-900/10 bg-white py-1.5 pl-1.5 pr-3 shadow-sm transition hover:bg-green-50"
+                >
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-green-700 font-bold text-white">{firstLetter}</span>
+                  <span className="max-w-32 truncate text-sm font-bold text-slate-800">{auth.user?.name || "Profile"}</span>
+                  <ChevronDown size={16} className="text-slate-500" />
                 </button>
 
-                <div
-                  className={`absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg py-2 z-50
-      transition-all duration-200 ease-out
-      ${profileOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible"}
-    `}
-                >
-                  <div className="flex p-2">
-                    <button onClick={goToDashboard} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
-                      Profile
+                {profileOpen && (
+                  <div className="absolute right-0 mt-3 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                    <button onClick={goToDashboard} className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-green-50">
+                      <LayoutDashboard size={17} /> Dashboard
                     </button>
-                    {showBell && (
-                      <button onClick={() => navigate("/notifications")} className="pr-1 relative p-2 rounded-full hover:bg-green-100">
-                        <Bell className="text-green-700" />
-
-                        {unreadCount > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">{unreadCount}</span>}
-                      </button>
-                    )}
+                    <button onClick={logout} className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50">
+                      <LogOut size={17} /> Logout
+                    </button>
                   </div>
-
-                  <button onClick={logout} className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500">
-                    Logout
-                  </button>
-                </div>
+                )}
               </div>
             ) : (
-              <div>
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="block mt-2 bg-white text-[#3BB149] px-4 py-2 rounded font-bold uppercase hover:bg-[#FFA534] hover:text-white transition"
-                >
-                  Login
-                </Link>
-              </div>
+              <Link to="/login" className="btn-primary">
+                <LogIn size={17} /> Login
+              </Link>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button onClick={() => setMenuOpen(!menuOpen)} className="focus:outline-none text-white">
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          <button onClick={() => setMenuOpen((value) => !value)} className="grid h-11 w-11 place-items-center rounded-xl border border-green-900/10 bg-green-50 text-green-900 lg:hidden" aria-label="Open menu">
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-[#3BB149] px-4 py-2 space-y-1">
-          {navLinks
-            .filter((link) => link.visible)
-            .map((link) => (
+        <div className="border-t border-green-900/10 bg-white px-4 py-4 shadow-lg lg:hidden">
+          <div className="container-pro space-y-2">
+            {visibleLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => setMenuOpen(false)}
-                className={`block px-4 py-2 rounded text-sm font-semibold uppercase transition duration-300 
-                ${isActive(link.to) ? "bg-[#FFA534]" : "hover:bg-[#FFA534]"}
-              `}
+                className={`block rounded-xl px-4 py-3 text-sm font-bold ${isActive(link.to) ? "bg-green-700 text-white" : "bg-slate-50 text-slate-800"}`}
               >
                 {link.label}
               </Link>
             ))}
 
-          {/* Mobile Login Button */}
-          {auth.isLoggedIn && (
-            <div className="mt-4">
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="w-10 h-10 rounded-full bg-white text-[#3BB149] font-bold flex items-center justify-center text-lg border-2 border-white mx-auto"
-              >
-                {firstLetter}
+            {showBell && (
+              <button onClick={() => navigate("/notifications")} className="flex w-full items-center justify-between rounded-xl bg-green-50 px-4 py-3 text-sm font-bold text-green-900">
+                <span className="flex items-center gap-2">
+                  <Bell size={17} /> Notifications
+                </span>
+                {unreadCount > 0 && <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs text-white">{unreadCount}</span>}
               </button>
+            )}
 
-              {profileOpen && (
-                <div className="bg-white text-black rounded-lg shadow-lg py-2 mt-2">
-                  <button
-                    onClick={() => {
-                      goToDashboard();
-                      setMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    Profile
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      logout();
-                      setMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+            {auth.isLoggedIn ? (
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button onClick={goToDashboard} className="btn-secondary">
+                  <User size={17} /> Profile
+                </button>
+                <button onClick={logout} className="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white">
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="btn-primary w-full">
+                <LogIn size={17} /> Login
+              </Link>
+            )}
+          </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { addInstruction, approveSchedule, deleteInstruction, editInstruction, getCropById, getInstructions, getProductList, getSchedulesByCropId, submitData } from "../api/api";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { useNavigate } from "react-router-dom";
@@ -56,6 +56,7 @@ const Form1 = () => {
     };
 
     init();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cropId, productsLoaded]);
 
   const fetchProducts = async () => {
@@ -118,6 +119,7 @@ const Form1 = () => {
     setWeekForms(updatedWeeks);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleQuantityChange = (weekIndex, productId, field, value, category, totalWater) => {
     const numericValue = parseFloat(value);
 

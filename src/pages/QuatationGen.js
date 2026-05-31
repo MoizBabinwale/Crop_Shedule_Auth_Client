@@ -7,7 +7,7 @@ import translations from "../utils/translations";
 import { useAuth } from "../context/AuthContext";
 
 import logo from "../assets/logo.jpg";
-import { googleBaseURL } from "../config/baseURL";
+import { BACKEND_BASE_URL } from "../config/baseURL";
 
 const QuatationGen = () => {
   const { quatationId } = useParams();
@@ -54,6 +54,7 @@ const QuatationGen = () => {
   };
 
   // Utility to replace numbers in the instructions HTML
+  // eslint-disable-next-line no-unused-vars
   function updateInstructionValues(html, week) {
     return html.replace(/\b\d+(\.\d+)?\b/g, (match) => {
       if (match === String(week.waterPerAcre)) {
@@ -171,11 +172,69 @@ const QuatationGen = () => {
       totalWater: week.totalWater ? `— કુલ ${week.totalWater} લીટર પાણી લાગશે` : null,
     };
   };
+
+  const buildPunjabiInstruction = (week) => {
+    const products = Object.values(week.products || {}).filter((p) => p.categoryKey !== "leaf_smoke");
+
+    const productText = products
+      .map((p) => {
+        const { ml, l } = parseQtyString(p.quantity);
+        if (l) return `${p.name} ${l} ਲੀਟਰ`;
+        if (ml) return `${p.name} ${ml} ml`;
+        return p.name;
+      })
+      .join(" ਅਤੇ ");
+
+    const water = week.waterPerAcre * week.totalAcres < 0.5 ? `${(week.waterPerAcre * week.totalAcres * 1000).toFixed(0)} ml` : `${(week.waterPerAcre * week.totalAcres).toFixed(2)} ਲੀਟਰ`;
+    const extraLine = detectPunjabiExtraInstruction(week.instructions);
+
+    return {
+      prefix: "",
+      highlighted: `${productText} ${water}`,
+      suffix: ` ਪਾਣੀ ਵਿੱਚ ਮਿਲਾ ਕੇ ਘੋਲ ਤਿਆਰ ਕਰੋ। ${extraLine}`,
+      totalWater: week.totalWater ? `— ਕੁੱਲ ${week.totalWater} ਲੀਟਰ ਪਾਣੀ ਲੱਗੇਗਾ` : null,
+    };
+  };
+
   const buildInstructionByLanguage = (week, language) => {
     if (language === "en") return buildEnglishInstruction(week);
     if (language === "hi") return buildHindiInstruction(week);
     if (language === "gu") return buildGujaratiInstruction(week);
+    if (language === "pa") return buildPunjabiInstruction(week);
     return buildMarathiInstruction(week); // default
+  };
+
+  const formatUseStartDay = (useStartDay = "", language) => {
+    if (!useStartDay) return "";
+
+    const dayNumber = useStartDay.match(/\d+/)?.[0];
+    const isStartDay = !dayNumber;
+
+    const labels = {
+      mr: {
+        start: "आरंभ दिवस",
+        day: (day) => `${day} वा दिवस`,
+      },
+      en: {
+        start: "Start day",
+        day: (day) => `Day ${day}`,
+      },
+      hi: {
+        start: "आरंभ दिवस",
+        day: (day) => `${day}वां दिन`,
+      },
+      gu: {
+        start: "શરૂઆતનો દિવસ",
+        day: (day) => `${day}મો દિવસ`,
+      },
+      pa: {
+        start: "ਸ਼ੁਰੂਆਤੀ ਦਿਨ",
+        day: (day) => `${day}ਵਾਂ ਦਿਨ`,
+      },
+    };
+
+    const selectedLabels = labels[language] || labels.mr;
+    return isStartDay ? selectedLabels.start : selectedLabels.day(dayNumber);
   };
 
   const buildMarathiInstruction = (week) => {
@@ -246,6 +305,20 @@ const QuatationGen = () => {
     return "तैयार मिश्रण को अनुशंसित विधि के अनुसार दें।";
   };
 
+  const detectPunjabiExtraInstruction = (instruction = "") => {
+    const text = instruction.toLowerCase();
+
+    if (text.includes("drenching")) {
+      return "ਇਹ ਘੋਲ ਡ੍ਰਿਪ ਸਿੰਚਾਈ ਜਾਂ ਡ੍ਰੈਂਚਿੰਗ ਰਾਹੀਂ ਦਿਓ।";
+    }
+
+    if (text.includes("spray") || text.includes("drip")) {
+      return "ਇਹ ਘੋਲ ਸਪਰੇ ਜਾਂ ਡ੍ਰਿਪ ਰਾਹੀਂ ਦਿਓ।";
+    }
+
+    return "ਤਿਆਰ ਕੀਤਾ ਘੋਲ ਸਿਫ਼ਾਰਸ਼ ਕੀਤੀ ਵਿਧੀ ਅਨੁਸਾਰ ਦਿਓ।";
+  };
+
   const handleRemoveCalendar = async (quotationId) => {
     try {
       setRemovingCalendar(true);
@@ -265,7 +338,7 @@ const QuatationGen = () => {
     }
   };
   const handleGoogleCalendarConnect = () => {
-    window.location.href = `${googleBaseURL}/auth/google?userId=${auth.user._id}&quotationId=${quotation._id}&redirect=/schedule/quotation/${quotation._id}`;
+    window.location.href = `${BACKEND_BASE_URL}/auth/google?userId=${auth.user._id}&quotationId=${quotation._id}&redirect=/schedule/quotation/${quotation._id}`;
   };
 
   return (
@@ -303,30 +376,30 @@ const QuatationGen = () => {
       {/* Main Print Area */}
       <div className="print-area bg-white p-4 sm:p-6 rounded shadow-md text-sm border border-gray-300 print:p-0 print:border-0 print:shadow-none print:rounded-none">
         {/* Header / Date Row */}
-        <div className="flex justify-between items-start">
-          <h3 className="text-green-700 font-semibold text-base mb-3">{t.farmerDetails}</h3>
+        <div className="flex justify-between items-start print:mb-0">
+          <h3 className="text-green-700 font-semibold text-base mb-3 print:mb-1 print:text-sm">{t.farmerDetails}</h3>
           <p className="font-bold text-right">
             {t.date}: {new Date().toLocaleDateString("en-GB")}
           </p>
         </div>
         {/* Header */}
-        <div className="flex items-start gap-4 px-4 py-2">
+        <div className="flex items-start gap-4 px-4 py-2 print:gap-2 print:px-1 print:py-0">
           {/* ✅ Logo (VISIBLE EVERYWHERE) */}
           <div className="flex-shrink-0">
-            <img src={logo} alt="Parnanetra Logo" className="h-16 w-auto object-contain" />
+            <img src={logo} alt="Parnanetra Logo" className="h-16 w-auto object-contain print:h-12" />
           </div>
 
           {/* ✅ Right Content */}
           <div className="flex-1">
             {/* Company Name */}
-            <div className="text-left mb-1">
-              <span className="text-base font-bold">
+            <div className="text-left mb-1 print:mb-0">
+              <span className="text-base font-bold print:text-sm">
                 <span className="text-green-700">Parnanetra</span> Ayurvedic Agro System
               </span>
             </div>
 
             {/* Farmer Info */}
-            <table className="w-full text-sm border-collapse">
+            <table className="w-full text-sm border-collapse print:text-[12px]">
               <tbody>
                 <tr>
                   <td className="font-semibold w-1/4">{t.farmer.name}:</td>
@@ -361,8 +434,8 @@ const QuatationGen = () => {
         </div>
         {/* Farmer Info */}
         {/* Screen Farmer Info (normal box) */}
-        <div className=" my-2 p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block">
-          <div className="text-center font-bold text-base sm:text-lg border-b leading-snug ">{t.header(quotation.cropName, quotation.acres)}</div>
+        <div className="my-2 p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block print:my-1 print:p-1 print:shadow-none">
+          <div className="text-center font-bold text-base sm:text-lg border-b leading-snug print:text-sm">{t.header(quotation.cropName, quotation.acres)}</div>
         </div>
 
         <div className="flex justify-end mb-3 print:hidden">
@@ -371,11 +444,12 @@ const QuatationGen = () => {
             <option value="en">English</option>
             <option value="hi">हिंदी</option>
             <option value="gu">ગુજરાતી</option>
+            <option value="pa">ਪੰਜਾਬੀ</option>
           </select>
         </div>
         {quotation.weeks.map((week, index) => (
           <div key={index} className="py-2 overflow-x-auto print:overflow-visible print:w-full mt-4 break-inside-avoid">
-            <table className="table-auto min-w-max border border-separate text-xs print:text-[14px] w-full" style={{ borderSpacing: "0 6px" }}>
+            <table className="table-fixed min-w-[1150px] border border-separate text-xs print:min-w-0 print:text-[14px] w-full" style={{ borderSpacing: "0 6px" }}>
               <thead className="bg-green-100 text-gray-900 print:table-header-group">
                 <tr>
                   <th className="border  py-2 whitespace-normal w-[15px]">{t.table.week}</th>
@@ -386,9 +460,9 @@ const QuatationGen = () => {
 
                   <th className="border  py-1 whitespace-normal">{t.table.totalWater}</th>
 
-                  <th className="border py-1 max-w-[250px]">{t.table.productQty}</th>
+                  <th className="border py-1 w-[14%]">{t.table.productQty}</th>
 
-                  <th className="border  py-1 max-w-[350px] w-[200px]">{t.table.instruction}</th>
+                  <th className="border px-3 py-2 w-[38%] text-base print:text-[16px]">{t.table.instruction}</th>
                 </tr>
               </thead>
               <tbody>
@@ -405,7 +479,7 @@ const QuatationGen = () => {
                         : ""}
                     </span>
                     <br />
-                    {week.useStartDay ? `${week.useStartDay}` : ""}
+                    {formatUseStartDay(week.useStartDay, language)}
                   </td>
                   <td className="border px-2 py-1 break-words w-[60px] max-w-[100px]">
                     <ul className="list-disc pl-4 space-y-1  ">
@@ -428,7 +502,7 @@ const QuatationGen = () => {
                   <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{week.waterPerAcre} ltr</td>
                   {/* <td className="border px-2 py-1 text-center">{week.totalAcres}</td> */}
                   <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{week.totalWater} लीटर </td>
-                  <td className="border px-2 py-1 break-words w-[65px] max-w-[100px]">
+                  <td className="border px-2 py-1 break-words">
                     <ul className=" space-y-1  max-w-[250px]">
                       {(week.products || []).map((prod, i) => (
                         <li key={i}>
@@ -437,12 +511,12 @@ const QuatationGen = () => {
                       ))}
                     </ul>
                   </td>
-                  <td className="border px-2 py-1 w-[200px]  break-words">
+                  <td className="border px-4 py-3 break-words align-top">
                     {week.products &&
                       (() => {
                         const text = buildInstructionByLanguage(week, language);
                         return (
-                          <p className=" text-green-900 leading-relaxed">
+                          <p className="text-[15px] font-medium leading-7 text-green-950 print:text-[14px] print:leading-7">
                             {text.prefix}
                             <span className="font-bold">{text.highlighted}</span>
                             {text.suffix}

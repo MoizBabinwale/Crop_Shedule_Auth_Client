@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { getProductList, addProduct, updateProductById, deleteProductById } from "../api/api";
 import { toast } from "react-toastify";

@@ -64,7 +64,7 @@ export default function GoogleSuccess() {
     };
 
     loginGoogleUser();
-  }, []);
+  }, [loginUserWithGoogle, navigate]);
 
   return (
     <div

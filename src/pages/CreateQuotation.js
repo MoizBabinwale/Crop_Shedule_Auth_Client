@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { addCropData, copyCrop, createQuotation, deleteCropById, editCropData, getCropById, getCropData, getCropDatawithBillStatus, getSchedulesByCropId } from "../api/api";
 import { toast } from "react-toastify";

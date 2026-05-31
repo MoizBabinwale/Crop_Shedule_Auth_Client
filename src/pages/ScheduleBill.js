@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getScheduleBillByScheduleId, createScheduleBill, getScheduleById } from "../api/api"; // adjust your import path

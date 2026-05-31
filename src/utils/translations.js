@@ -118,6 +118,36 @@ const translations = {
       instruction: "સૂચનાઓ",
     },
   },
+
+  pa: {
+    printSchedule: "ਸ਼ੈਡਿਊਲ ਪ੍ਰਿੰਟ ਕਰੋ",
+    printQuotation: "📄 ਕੋਟੇਸ਼ਨ ਪ੍ਰਿੰਟ",
+    farmerDetails: "👨‍🌾 ਕਿਸਾਨ ਦੀ ਜਾਣਕਾਰੀ",
+    date: "ਤਾਰੀਖ",
+
+    header: (crop, acres) => `${crop} ਲਈ ${acres} ਏਕੜ ਪਲਾਟ ਦਾ ਪਰਨਨੇਤ੍ਰ ਆਯੁਰਵੇਦਿਕ ਐਗਰੋ ਸਿਸਟਮ ਸ਼ੈਡਿਊਲ`,
+
+    farmer: {
+      name: "ਕਿਸਾਨ ਦਾ ਨਾਮ",
+      number: "ਮੋਬਾਈਲ ਨੰਬਰ",
+      email: "ਈਮੇਲ",
+      place: "ਪਿੰਡ",
+      tahsil: "ਤਹਿਸੀਲ",
+      district: "ਜ਼ਿਲ੍ਹਾ",
+      state: "ਰਾਜ",
+    },
+
+    table: {
+      week: "ਹਫ਼ਤਾ",
+      date: "ਤਾਰੀਖ / ਵਰਤੋਂ ਦਾ ਦਿਨ",
+      products: "ਉਤਪਾਦ",
+      perLitre: "ਪ੍ਰਤੀ ਲੀਟਰ ਮਿਸ਼ਰਣ",
+      waterPerAcre: "ਪਾਣੀ ਪ੍ਰਤੀ ਏਕੜ",
+      totalWater: "ਕੁੱਲ ਪਾਣੀ",
+      productQty: "ਉਤਪਾਦ ਅਤੇ ਮਾਤਰਾ",
+      instruction: "ਹਦਾਇਤਾਂ",
+    },
+  },
 };
 
 export default translations;

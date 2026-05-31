@@ -205,18 +205,18 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-green-50 p-6">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-6">
+    <div className="page-shell">
+      <div className="container-pro panel-pro p-4 sm:p-6 lg:p-8">
         <h1 className="text-3xl font-bold text-green-700 mb-4">🛠️ Admin Dashboard</h1>
 
         <p className="text-lg mb-6 text-gray-700">Manage users, approve accounts, edit roles, and remove users.</p>
 
         {/* Users Table */}
-        <div className="overflow-x-auto">
+        <div className="mobile-scroll">
           <div>
             {currentAdmin && (
-              <div className="mb-6 space-y-3 bg-green-50 p-4 rounded-xl">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="mb-6 rounded-2xl border border-green-900/10 bg-green-50/80 p-4 sm:p-5">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <p className="text-lg">
                     <span className="font-semibold">Name:</span> {currentAdmin.name}
                   </p>
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-          <div className="bg-green-100 p-6 rounded-xl shadow w-1/2 mb-3">
+          <div className="mb-5 w-full rounded-2xl border border-green-900/10 bg-white p-5 shadow-sm sm:max-w-md">
             {" "}
             <h2 className="font-bold text-xl text-green-700 mb-2">📄 Quotations</h2> <p className="text-gray-700">Check your generated quotations.</p>{" "}
             <button onClick={() => navigate("/quotation/master")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
@@ -263,8 +263,8 @@ export default function AdminDashboard() {
           {loading ? (
             <Loading />
           ) : (
-            <table className="w-full text-left border border-gray-300 rounded-lg">
-              <thead className="bg-green-600 text-white">
+            <table className="table-pro min-w-[780px] text-left">
+              <thead>
                 <tr>
                   <th className="p-3">Name</th>
                   <th className="p-3">Email</th>

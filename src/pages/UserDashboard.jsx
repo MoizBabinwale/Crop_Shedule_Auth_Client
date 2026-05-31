@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -96,13 +97,13 @@ export default function UserDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-green-50 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-6">
+    <div className="page-shell">
+      <div className="container-pro panel-pro max-w-5xl p-4 sm:p-6 lg:p-8">
         <h1 className="text-3xl font-bold text-green-700 mb-4">👨‍🌾 User Dashboard</h1>
 
         {user && (
           <div className="mb-6 space-y-3">
-            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-6 grid grid-cols-1 gap-4 rounded-2xl border border-green-900/10 bg-green-50/80 p-4 md:grid-cols-2 lg:grid-cols-4">
               <p className="text-lg">
                 <span className="font-semibold">Name:</span> {user.name}
               </p>
@@ -135,31 +136,31 @@ export default function UserDashboard() {
               <p className="text-lg">
                 <span className="font-semibold">State:</span> {user.state || "Not Updated"}
               </p>
-              <button onClick={() => setShowModal(true)} className="flex items-center gap-1 text-green-600 hover:text-green-800 font-semibold">
+              <button onClick={() => setShowModal(true)} className="btn-secondary w-full sm:w-fit">
                 <FaPencil size={18} /> Edit Profile
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
               {" "}
               {auth.user?.role !== "user" && (
-                <div className="bg-green-100 p-6 rounded-xl shadow">
+                <div className="stat-card">
                   {" "}
                   <h2 className="font-bold text-xl text-green-700 mb-2">🌱 Crop Schedules</h2> <p className="text-gray-700">View your crop schedules and updates.</p>{" "}
-                  <button onClick={() => navigate("/crop-schedule")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                  <button onClick={() => navigate("/crop-schedule")} className="btn-primary mt-3">
                     {" "}
                     View Schedules{" "}
                   </button>{" "}
                 </div>
               )}{" "}
-              <div className="bg-green-100 p-6 rounded-xl shadow">
+              <div className="stat-card">
                 <h2 className="font-bold text-xl text-green-700 mb-2">📄 Quotations</h2>
 
                 <p className="text-gray-700">
                   Total Generated: <span className="font-bold">{quotationCount}</span>
                 </p>
 
-                <button onClick={() => navigate("/quotation/master")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                <button onClick={() => navigate("/quotation/master")} className="btn-primary mt-3">
                   View Quotations
                 </button>
               </div>
