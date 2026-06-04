@@ -9,8 +9,10 @@ import { useAuth } from "../context/AuthContext";
 const Home = () => {
   const { auth } = useAuth();
 
+  const canViewCropSchedules = auth.user?.role === "admin" || auth.user?.canEditSchedule;
+
   const services = [
-    { title: "Crop Schedules", desc: "Plan week-wise crop care with organized schedules and product instructions.", icon: CalendarDays, to: "/croplists", visible: auth.user?.role !== "user" },
+    { title: "Crop Schedules", desc: "Plan week-wise crop care with organized schedules and product instructions.", icon: CalendarDays, to: "/croplists", visible: canViewCropSchedules },
     { title: "Quotations", desc: "Create, review, and manage quotations from a clean digital workflow.", icon: FileText, to: "/quotation/master", visible: true },
     { title: "Products", desc: "Maintain product details, pricing, and usage guidance in one place.", icon: PackageSearch, to: "/products", visible: auth.user?.role !== "user" },
     { title: "About Parnanetra", desc: "Learn about the research-led work behind the agro system.", icon: Leaf, to: "/about", visible: true },

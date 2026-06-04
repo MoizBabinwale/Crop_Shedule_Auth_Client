@@ -83,14 +83,14 @@ export default function AdminDashboard() {
   };
 
   // Update user role
-  const updateRole = async (id, role) => {
-    try {
-      await axios.put(`${BASE_URL}/auth/admin/update-role/${id}`, { role }, { headers: { Authorization: `Bearer ${token}` } });
-      getAllUsers();
-    } catch (error) {
-      console.error("Error updating role:", error);
-    }
-  };
+  // const updateRole = async (id, role) => {
+  //   try {
+  //     await axios.put(`${BASE_URL}/auth/admin/update-role/${id}`, { role }, { headers: { Authorization: `Bearer ${token}` } });
+  //     getAllUsers();
+  //   } catch (error) {
+  //     console.error("Error updating role:", error);
+  //   }
+  // };
 
   useEffect(() => {
     getAllUsers();
@@ -139,6 +139,8 @@ export default function AdminDashboard() {
     tahsil: "",
     district: "",
     state: "",
+    viewAccess: "none",
+    canEditSchedule: false,
   });
 
   const updateUserDetails = async () => {
@@ -169,6 +171,8 @@ export default function AdminDashboard() {
       tahsil: user.tahsil || "",
       district: user.district || "",
       state: user.state || "",
+      viewAccess: user.viewAccess || "none",
+      canEditSchedule: user.canEditSchedule || false,
     });
     setEditUserModal(true);
   };
@@ -182,11 +186,11 @@ export default function AdminDashboard() {
     return false;
   };
 
-  const canChangeRole = (user) => {
-    if (isAdmin) return true;
-    if (isSubAdmin && user.role !== "admin") return true;
-    return false;
-  };
+  // const canChangeRole = (user) => {
+  //   if (isAdmin) return true;
+  //   if (isSubAdmin && user.role !== "admin") return true;
+  //   return false;
+  // };
 
   const handleConfirmDelete = async () => {
     try {
@@ -205,14 +209,14 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="page-shell">
-      <div className="container-pro panel-pro p-4 sm:p-6 lg:p-8">
+    <div className="page-shell w-full">
+      <div className="container-pro max-w-full w-full px-0 panel-pro p-4 sm:p-6 lg:p-8">
         <h1 className="text-3xl font-bold text-green-700 mb-4">🛠️ Admin Dashboard</h1>
 
         <p className="text-lg mb-6 text-gray-700">Manage users, approve accounts, edit roles, and remove users.</p>
 
         {/* Users Table */}
-        <div className="mobile-scroll">
+        <div className="w-full">
           <div>
             {currentAdmin && (
               <div className="mb-6 rounded-2xl border border-green-900/10 bg-green-50/80 p-4 sm:p-5">
@@ -263,97 +267,119 @@ export default function AdminDashboard() {
           {loading ? (
             <Loading />
           ) : (
-            <table className="table-pro min-w-[780px] text-left">
-              <thead>
-                <tr>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Email</th>
-                  <th className="p-3">Role</th>
-                  <th className="p-3 text-center">Quotations</th>
-                  <th className="p-3">Status</th>
-                  {isAdmin && <th className="p-3 text-center">Actions</th>}
-                </tr>
-              </thead>
-
-              <tbody>
-                {users.length <= 1 ? (
+            <div className="w-full overflow-x-auto border rounded-lg">
+              <table className="table-pro w-full text-left">
+                <thead>
                   <tr>
-                    <td colSpan="6" className="text-center p-4 text-gray-500">
-                      No users found.
-                    </td>
+                    <th className="p-3 min-w-[140px]">Name</th>
+                    <th className="p-3 min-w-[180px]">Email</th>
+                    <th className="p-3 min-w-[80px]">Role</th>
+                    {isAdmin && <th className="p-3 min-w-[110px]">View Access</th>}
+                    {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule Edit</th>}
+                    <th className="p-3 text-center min-w-[90px]">Quotations</th>
+                    <th className="p-3 min-w-[100px]">Status</th>
+                    {isAdmin && <th className="p-3 text-center min-w-[140px]">Actions</th>}
                   </tr>
-                ) : (
-                  users
-                    .filter((u) => u._id !== currentAdmin?._id)
-                    .map((u) => (
-                      <tr key={u._id} className="border-b hover:bg-green-50 transition">
-                        {/* NAME */}
-                        <td className="p-3 font-medium text-gray-800">{u.name}</td>
+                </thead>
 
-                        {/* EMAIL */}
-                        <td className="p-3 text-gray-700">{u.email}</td>
+                <tbody>
+                  {users.length <= 1 ? (
+                    <tr>
+                      <td colSpan="6" className="text-center p-4 text-gray-500">
+                        No users found.
+                      </td>
+                    </tr>
+                  ) : (
+                    users
+                      .filter((u) => u._id !== currentAdmin?._id)
+                      .map((u) => (
+                        <tr key={u._id} className="border-b hover:bg-green-50 transition">
+                          {/* NAME */}
+                          <td className="p-3 font-medium text-gray-800 min-w-[140px]">{u.name}</td>
 
-                        {/* ROLE */}
-                        <td className="p-3 capitalize">
-                          <span className="px-2 py-1 rounded-md bg-gray-200 text-sm font-semibold">{u.role}</span>
-                        </td>
+                          {/* EMAIL */}
+                          <td className="p-3 text-gray-700 min-w-[180px] break-words">{u.email}</td>
 
-                        {/* QUOTATIONS COUNT */}
-                        <td className="p-3 text-center font-bold text-green-700">{u.totalQuotations || 0}</td>
-
-                        {/* STATUS */}
-                        <td className="p-3">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
-
-                        {/* ACTIONS */}
-                        {isAdmin && (
-                          <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              {/* Role Change */}
-                              {canChangeRole(u) && (
-                                <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm">
-                                  <option value="user">User</option>
-                                  <option value="subadmin">Sub Admin</option>
-                                  {isAdmin && <option value="admin">Admin</option>}
-                                </select>
-                              )}
-
-                              {/* Edit */}
-                              {canEditUser(u) && (
-                                <button onClick={() => openEditUserModal(u)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full" title="Edit User">
-                                  <FaEdit size={14} />
-                                </button>
-                              )}
-
-                              {/* Delete */}
-                              <button
-                                onClick={() => {
-                                  setSelectedUserId(u._id);
-                                  setSelectedUserName(u.name);
-                                  setConfirmOpen(true);
-                                }}
-                                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
-                                title="Delete User"
-                              >
-                                <FaTrash size={14} />
-                              </button>
-
-                              {/* Approve */}
-                              {!u.approved && u.role !== "admin" && (
-                                <button onClick={() => approveUser(u._id)} className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full" title="Approve User">
-                                  <FaCheck size={14} />
-                                </button>
-                              )}
-                            </div>
+                          {/* ROLE */}
+                          <td className="p-3 capitalize min-w-[80px]">
+                            <span className="px-2 py-1 rounded-md bg-gray-200 text-sm font-semibold">{u.role}</span>
                           </td>
-                        )}
-                      </tr>
-                    ))
-                )}
-              </tbody>
-            </table>
+
+                          {isAdmin && (
+                            <td className="p-3 min-w-[110px]">
+                              <span className="text-sm font-semibold capitalize">{u.viewAccess || "none"}</span>
+                            </td>
+                          )}
+
+                          {isAdmin && (
+                            <td className="p-3 text-center min-w-[100px]">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canEditSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                              >
+                                {u.canEditSchedule ? "Yes" : "No"}
+                              </span>
+                            </td>
+                          )}
+
+                          {/* QUOTATIONS COUNT */}
+                          <td className="p-3 text-center font-bold text-green-700 min-w-[90px]">{u.totalQuotations || 0}</td>
+
+                          {/* STATUS */}
+                          <td className="p-3 min-w-[100px]">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
+
+                          {/* ACTIONS */}
+                          {isAdmin && (
+                            <td className="p-3 min-w-[140px]">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {/* Role Change */}
+                                {/* {canChangeRole(u) && (
+                                  <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm whitespace-nowrap">
+                                    <option value="user">User</option>
+                                    <option value="subadmin">Sub Admin</option>
+                                    {isAdmin && <option value="admin">Admin</option>}
+                                  </select>
+                                )} */}
+
+                                {/* Edit */}
+                                {canEditUser(u) && (
+                                  <button onClick={() => openEditUserModal(u)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full" title="Edit User">
+                                    <FaEdit size={14} />
+                                  </button>
+                                )}
+
+                                {/* Delete */}
+                                <button
+                                  onClick={() => {
+                                    setSelectedUserId(u._id);
+                                    setSelectedUserName(u.name);
+                                    setConfirmOpen(true);
+                                  }}
+                                  className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
+                                  title="Delete User"
+                                >
+                                  <FaTrash size={14} />
+                                </button>
+
+                                {/* Approve */}
+                                {!u.approved && u.role !== "admin" && (
+                                  <button onClick={() => approveUser(u._id)} className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full" title="Approve User">
+                                    <FaCheck size={14} />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
@@ -416,6 +442,17 @@ export default function AdminDashboard() {
                 <option value="true">Approved</option>
                 <option value="false">Pending</option>
               </select>
+
+              <select value={editForm.viewAccess} onChange={(e) => setEditForm({ ...editForm, viewAccess: e.target.value })} className="p-2 border rounded">
+                <option value="none">No access</option>
+                <option value="all-users">All users</option>
+                <option value="subadmins">Subadmins only</option>
+              </select>
+
+              <label className="flex items-center gap-2 rounded border p-2 bg-white">
+                <input type="checkbox" checked={editForm.canEditSchedule} onChange={(e) => setEditForm({ ...editForm, canEditSchedule: e.target.checked })} />
+                <span className="text-sm">Can edit schedules</span>
+              </label>
 
               <input placeholder="Place" value={editForm.place} onChange={(e) => setEditForm({ ...editForm, place: e.target.value })} className="p-2 border rounded" />
 

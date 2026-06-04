@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function ProtectedRoute({ children, role, roles }) {
+export default function ProtectedRoute({ children, role, roles, permission }) {
   const { auth } = useAuth();
 
   // WAIT until auth loads
@@ -15,6 +15,8 @@ export default function ProtectedRoute({ children, role, roles }) {
   if (role && auth.user?.role !== role) return <Navigate to="/" replace />;
 
   if (roles && !roles.includes(auth.user?.role)) return <Navigate to="/" replace />;
+
+  if (permission && !permission(auth.user)) return <Navigate to="/" replace />;
 
   return children;
 }

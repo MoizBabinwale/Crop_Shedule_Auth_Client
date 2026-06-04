@@ -85,8 +85,7 @@ const AllRoutes = () => {
       <Route
         path="/schedule/:cropId"
         element={
-          <ProtectedRoute roles={["admin", "subadmin"]}>
-            {" "}
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canEditSchedule}>
             <ScheduleView />
           </ProtectedRoute>
         }
@@ -96,9 +95,8 @@ const AllRoutes = () => {
       <Route
         path="/croplists"
         element={
-          <ProtectedRoute roles={["admin", "subadmin"]}>
-            {" "}
-            <CropList />{" "}
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canEditSchedule}>
+            <CropList />
           </ProtectedRoute>
         }
       />

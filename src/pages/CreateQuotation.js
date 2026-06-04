@@ -190,9 +190,9 @@ function CropList() {
 
       const updatedFarmerData = {
         ...farmerInfo,
-        _id: loggedInUser?._id || "",
-        email: loggedInUser?.email || "",
-        number: loggedInUser?.number || "",
+        _id: loggedInUser?._id || farmerInfo?._id || "",
+        email: farmerInfo?.email || loggedInUser?.email || "",
+        number: farmerInfo?.number || loggedInUser?.number || "",
       };
 
       const crop = await getCropById(cropId);
@@ -232,7 +232,7 @@ function CropList() {
         return {
           ...week,
           date: newWeekDate.toISOString().split("T")[0],
-          totalWater: String(acres * Number(week.waterPerAcre || 0)),
+          totalWater: Number(acres * Number(week.waterPerAcre || 0)).toFixed(2),
           totalAcres: String(acres),
           productAmountMg: String(acres * Number(week.productAmountMg || 0)),
           productAmountLtr: String(acres * Number(week.productAmountLtr || 0)),

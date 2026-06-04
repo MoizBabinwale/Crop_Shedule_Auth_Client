@@ -117,7 +117,7 @@ const QuatationGen = () => {
       prefix: "Mix ",
       highlighted: `${productText} with ${water}`,
       suffix: ` of water to prepare the solution. Prepare the mixture by mixing with water. ${extraLine}`,
-      totalWater: week.totalWater ? `— Total ${week.totalWater} liter water required` : null,
+      totalWater: week.totalWater ? `— Total ${Number(week.totalWater).toFixed(2)} liter water required` : null,
     };
   };
 
@@ -143,7 +143,7 @@ const QuatationGen = () => {
       highlighted: `${productText} ${water}`,
       // Use the extraLine instead of week.instructions
       suffix: ` पानी में मिलाकर घोल तैयार करें। ${extraLine}`,
-      totalWater: week.totalWater ? `— कुल ${week.totalWater} लीटर पानी लगेगा` : null,
+      totalWater: week.totalWater ? `— कुल ${Number(week.totalWater).toFixed(2)} लीटर पानी लगेगा` : null,
     };
   };
 
@@ -169,7 +169,7 @@ const QuatationGen = () => {
       highlighted: `${productText} ${water}`,
       // Use the extraLine instead of week.instructions
       suffix: ` પાણીમાં મિક્સ કરીને દ્રાવણ તૈયાર કરો. ${extraLine}`,
-      totalWater: week.totalWater ? `— કુલ ${week.totalWater} લીટર પાણી લાગશે` : null,
+      totalWater: week.totalWater ? `— કુલ ${Number(week.totalWater).toFixed(2)} લીટર પાણી લાગશે` : null,
     };
   };
 
@@ -192,7 +192,7 @@ const QuatationGen = () => {
       prefix: "",
       highlighted: `${productText} ${water}`,
       suffix: ` ਪਾਣੀ ਵਿੱਚ ਮਿਲਾ ਕੇ ਘੋਲ ਤਿਆਰ ਕਰੋ। ${extraLine}`,
-      totalWater: week.totalWater ? `— ਕੁੱਲ ${week.totalWater} ਲੀਟਰ ਪਾਣੀ ਲੱਗੇਗਾ` : null,
+      totalWater: week.totalWater ? `— ਕੁੱਲ ${Number(week.totalWater).toFixed(2)} ਲੀਟਰ ਪਾਣੀ ਲੱਗੇਗਾ` : null,
     };
   };
 
@@ -259,7 +259,7 @@ const QuatationGen = () => {
       highlighted: `${productText} ${water}`,
       // Use the extraLine instead of week.instructions
       suffix: ` पाणी मध्ये मिसळून द्रावण तयार करावे. ${extraLine}`,
-      totalWater: week.totalWater ? `— एकूण ${week.totalWater} लीटर पाणी लागेल` : null,
+      totalWater: week.totalWater ? `— एकूण ${Number(week.totalWater).toFixed(2)} लीटर पाणी लागेल` : null,
     };
   };
 
@@ -346,7 +346,26 @@ const QuatationGen = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 print:p-4 print:text-lg">
+    <div className="p-4 sm:p-6 md:p-8 print:p-0 print:text-lg">
+      <style>{`
+        @media print {
+
+          html,
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          .print-area {
+            margin  : 15px 0px 0px 0px !important;
+            padding: 0 !important;
+          }
+
+          .print-header-repeating > div {
+            margin-top: 0 !important;
+          }
+        }
+      `}</style>
       {/* Button Actions */}
       <div className="flex flex-col sm:flex-row justify-end mb-4 print:hidden gap-3 sm:gap-10">
         {quotation.weeks?.some((week) => week.googleEventId) ? (
@@ -378,19 +397,19 @@ const QuatationGen = () => {
       </div>
 
       {/* Main Print Area */}
-      <div className="print-area bg-white p-4 sm:p-6 rounded shadow-md text-sm border border-gray-300 print:p-0 print:border-0 print:shadow-none print:rounded-none">
+      <div className="print-area bg-white p-4 sm:p-6 rounded shadow-md text-sm border border-gray-300 print:p-0 print:border-0 print:shadow-none print:rounded-none print:page-break-before-auto print:mt-2">
         {/* Header / Date Row */}
-        <div className="flex justify-between items-start print:mb-0">
-          <h3 className="text-green-700 font-semibold text-base mb-3 print:mb-1 print:text-sm">{t.farmerDetails}</h3>
+        <div className="flex justify-between items-start print:mt-5">
+          <h3 className="text-green-700 font-semibold text-base mb-3  print:text-sm">{t.farmerDetails}</h3>
           <p className="font-bold text-right">
             {t.date}: {new Date().toLocaleDateString("en-GB")}
           </p>
         </div>
         {/* Header */}
-        <div className="flex items-start gap-4 px-4 py-2 print:gap-2 print:px-1 print:py-0">
+        <div className="flex items-start gap-4 px-4 py-2 print:px-1 print:py-0">
           {/* ✅ Logo (VISIBLE EVERYWHERE) */}
           <div className="flex-shrink-0 hidden md:block">
-            <img src={logo} alt="Parnanetra Logo" className="h-16 w-auto object-contain print:h-12" />
+            <img src={logo} alt="Parnanetra Logo" className="h-16 w-auto object-contain " />
           </div>
 
           {/* ✅ Right Content */}
@@ -454,13 +473,60 @@ const QuatationGen = () => {
           </select>
         </div>
         {quotation.weeks.map((week, index) => (
-          <div key={index} className="py-2 overflow-x-auto print:overflow-visible print:w-full mt-4 break-inside-avoid">
-            <table className="table-fixed min-w-[1150px] border border-separate text-xs print:min-w-0 print:text-[14px] w-full" style={{ borderSpacing: "0 6px" }}>
+          <div key={index} className="week-block break-avoid py-2 overflow-x-auto print:overflow-visible print:w-full print:mt-5 print:mb-0" style={{ breakInside: "avoid" }}>
+            {/* HEADER REPEATS ON EVERY PAGE IN PRINT */}
+            <div className="print-header-repeating hidden print:block print:page-break-after-avoid print:m-0 print:p-0">
+              <div className="px-4 py-2 border-b border-gray-300 bg-white text-[12px] leading-4 print:mb-2">
+                {/* DATE AT TOP RIGHT */}
+                <div className="text-right text-[10px] text-slate-700 mb-2 pb-2 border-b border-gray-300">
+                  <span className="font-semibold">{t.date}:</span> {new Date().toLocaleDateString("en-GB")}
+                </div>
+
+                {/* CENTERED CROP HEADING */}
+                <div className="text-center mb-3 py-1">
+                  <span className="font-bold text-sm text-green-700">{t.header(quotation.cropName, quotation.acres)}</span>
+                </div>
+
+                {/* FARMER DETAILS IN 2 COLUMNS */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[11px] text-slate-800">
+                  {/* Left Column */}
+                  <div className="space-y-1">
+                    <div>
+                      <span className="font-semibold">{t.farmer.name}:</span> {quotation.farmerInfo?.name || "-"}
+                    </div>
+                    <div>
+                      <span className="font-semibold">{t.farmer.number}:</span> {quotation.farmerInfo?.number || "-"}
+                    </div>
+                    <div>
+                      <span className="font-semibold">{t.farmer.email}:</span> {quotation.farmerInfo?.email || "-"}
+                    </div>
+                    <div>
+                      <span className="font-semibold">{t.farmer.place}:</span> {quotation.farmerInfo?.place || "-"}
+                    </div>
+                  </div>
+                  {/* Right Column */}
+                  <div className="space-y-1">
+                    <div>
+                      <span className="font-semibold">{t.farmer.tahsil}:</span> {quotation.farmerInfo?.tahsil || "-"}
+                    </div>
+                    <div>
+                      <span className="font-semibold">{t.farmer.district}:</span> {quotation.farmerInfo?.district || "-"}
+                    </div>
+                    <div>
+                      <span className="font-semibold">{t.farmer.state}:</span> {quotation.farmerInfo?.state || "-"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="print-header-space hidden print:block"></div>
+            <table className="table-auto min-w-[980px] border border-separate text-xs print:min-w-0 print:text-[14px] w-full print:mt-3" style={{ borderSpacing: "0 6px" }}>
               <thead className="bg-green-100 text-gray-900 print:table-header-group">
                 <tr>
-                  <th className="border  py-2 whitespace-normal w-[15px]">{t.table.week}</th>
-                  <th className="border py-2 whitespace-nowrap w-[9%]">{t.table.date}</th>
-                  <th className="border py-2  max-w-[250px]"> {t.table.products}</th>
+                  <th className="border py-2 whitespace-normal w-[60px]">{t.table.week}</th>
+                  <th className="border py-2 whitespace-nowrap w-[110px]">{t.table.date}</th>
+                  <th className="border py-2 max-w-[260px]">{t.table.products}</th>
                   <th className="border  py-2 print:hidden  whitespace-normal"> {t.table.perLitre}</th>
                   <th className="border  py-2 whitespace-normal">{t.table.waterPerAcre}</th>
 
@@ -473,7 +539,7 @@ const QuatationGen = () => {
               </thead>
               <tbody>
                 <tr className="align-top">
-                  <td className="border  py-1 text-center w-[15px]">{week.weekNumber}</td>
+                  <td className="border py-1 text-center w-[60px]">{week.weekNumber}</td>
                   <td className="border py-1 text-center whitespace-normal">
                     <span className="underline">
                       {week.date
@@ -487,7 +553,7 @@ const QuatationGen = () => {
                     <br />
                     {formatUseStartDay(week.useStartDay, language)}
                   </td>
-                  <td className="border px-2 py-1 break-words w-[60px] max-w-[100px]">
+                  <td className="border px-2 py-1 break-words w-[220px] max-w-[220px]">
                     <ul className="list-disc pl-4 space-y-1  ">
                       {(week.products || []).map((prod, i) => (
                         <li key={i}>
@@ -507,7 +573,7 @@ const QuatationGen = () => {
                   </td>
                   <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{week.waterPerAcre} ltr</td>
                   {/* <td className="border px-2 py-1 text-center">{week.totalAcres}</td> */}
-                  <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{week.totalWater} लीटर </td>
+                  <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{parseFloat(Number(week.totalWater).toFixed(2))} लीटर</td>
                   <td className="border px-2 py-1 break-words">
                     <ul className=" space-y-1  max-w-[250px]">
                       {(week.products || []).map((prod, i) => (

@@ -37,72 +37,103 @@
   }
 }
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    size: A4;
+    margin: 20mm 10mm 20mm 10mm;
   }
 
-  .print-area,
-  .print-area * {
-    visibility: visible;
-  }
-
-  .print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    margin: 0;
+    padding: 0;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
+    page-break-inside: auto;
   }
 
-  td {
-    padding: 4px 6px;
-    vertical-align: top;
-  }
-  .flex {
-    display: flex !important;
+  thead {
+    display: table-header-group !important;
   }
 
-  img {
-    display: block !important;
+  tfoot {
+    display: table-footer-group !important;
   }
-  .page-break-block {
-    page-break-inside: avoid;
+
+  tr,
+  td,
+  th {
+    page-break-inside: avoid !important;
   }
-  body {
-    margin: 0;
-    padding: 0;
+
+  .overflow-x-auto {
+    overflow-x: visible !important;
   }
 
   .print-area {
     width: 100%;
-    margin: 0;
-    padding: 8px;
+    box-sizing: border-box;
+    page-break-after: auto;
   }
 
   table {
-    page-break-inside: avoid;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
   }
 
   tr {
     page-break-inside: avoid;
   }
 
-  h1,
-  h2,
-  h3 {
-    page-break-after: avoid;
+  .week-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
-  /* Optional: Hide scrollbars */
-  @page {
-    margin: 20mm;
+  .print-btn {
+    display: none !important;
+  }
+
+  .footer-print {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    text-align: center;
+    font-size: 10px;
+    border-top: 1px solid #ccc;
+    padding: 4px;
+  }
+
+  .print-header-repeating {
+    display: none !important;
+  }
+}
+
+@media print {
+  thead {
+    display: table-header-group !important;
+  }
+
+  tfoot {
+    display: table-footer-group !important;
+  }
+
+  tr,
+  td,
+  th {
+    page-break-inside: avoid !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
   }
 }

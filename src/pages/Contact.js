@@ -25,7 +25,7 @@ const Contact = () => {
       const res = await submitContactMessage(formData);
       if (res) {
         setAlert({
-          message: "संदेश यशस्वीरीत्या पाठवला ✅",
+          message: "संदेश सफलतापूर्वक भेजा गया ✅",
           type: "success",
         });
 
@@ -39,7 +39,7 @@ const Contact = () => {
       }
     } catch (err) {
       setAlert({
-        message: "संदेश पाठवता आला नाही ❌",
+        message: "संदेश भेजने में विफल ❌",
         type: "error",
       });
     }
@@ -52,8 +52,8 @@ const Contact = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Section Header */}
         <div className="mx-auto text-center mb-10 max-w-xl">
-          <h6 className="text-green-600 uppercase text-sm font-semibold mb-3">संपर्क करा</h6>
-          <h1 className="text-4xl font-bold text-gray-800">कृपया आमच्याशी मोकळेपणाने संपर्क साधा</h1>
+          <h6 className="text-green-600 uppercase text-sm font-semibold mb-3">संपर्क करें</h6>
+          <h1 className="text-4xl font-bold text-gray-800">कृपया हमसे बेझिझक संपर्क करें</h1>
         </div>
 
         {/* Main Grid */}
@@ -67,7 +67,7 @@ const Contact = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="तुमचं नाव"
+                  placeholder="आपका नाम"
                   className="bg-white text-gray-800 border-0 px-4 py-3 rounded w-full"
                   style={{ height: "55px" }}
                 />
@@ -77,7 +77,7 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="तुमचा ईमेल"
+                  placeholder="आपका ईमेल"
                   className="bg-white text-gray-800 border-0 px-4 py-3 rounded w-full"
                   style={{ height: "55px" }}
                 />
@@ -101,7 +101,7 @@ const Contact = () => {
                   className="bg-white text-gray-800 border-0 px-4 py-3 rounded w-full col-span-1 md:col-span-2"
                 />
                 <button type="submit" className="bg-gray-100 text-green-700 font-semibold w-full py-3 rounded col-span-1 md:col-span-2 hover:bg-white transition">
-                  संदेश पाठवा
+                  संदेश भेजें
                 </button>
               </div>
             </form>
@@ -109,15 +109,15 @@ const Contact = () => {
 
           {/* Right Contact Info Section */}
           <div className="lg:w-5/12 bg-gray-700 text-white p-6 lg:p-10">
-            <h2 className="text-2xl font-bold mb-6">संपर्कात रहा</h2>
+            <h2 className="text-2xl font-bold mb-6">संपर्क में रहें</h2>
 
             <div className="flex items-start mb-6">
               <div className="bg-green-600 rounded-full w-[60px] h-[60px] flex items-center justify-center">
                 <i className="bi bi-geo-alt text-white text-2xl"></i>
               </div>
               <div className="ml-4">
-                <h5 className="text-lg font-semibold">आमचं कार्यालय</h5>
-                <p>१२३, मुख्य रस्ता, पुणे, भारत</p>
+                <h5 className="text-lg font-semibold">हमारा कार्यालय</h5>
+                <p>१२३, मुख्य सड़क, पुणे, भारत</p>
               </div>
             </div>
 

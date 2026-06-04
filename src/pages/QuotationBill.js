@@ -76,7 +76,7 @@ const QuotationBill = () => {
 
   return (
     <div className="pt-4 px-4 mb-6 w-full print:p-2 print:mb-0 bg-white border border-green-300 rounded shadow text-sm">
-      <div className="print-area pt-4 px-4  mb-4 w-full print:w-full print:m-0 bg-white border-black text-sm ">
+      <div className="quotation-bill-print-area print-area pt-4 px-4 mb-4 w-full print:w-full print:m-0 bg-white border-black text-sm">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-green-700 flex items-center gap-2">
@@ -96,7 +96,7 @@ const QuotationBill = () => {
             <p className=" print:hidden font-bold text-right">दिनांक: {new Date(billDate).toLocaleDateString("en-GB")}</p>
           </div>
 
-          <div className="hidden print:block print-header  py-2  top-0 left-0 right-0 bg-white border-b border-gray-300">
+          <div className="hidden print:block py-2 bg-white border-b border-gray-300">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 px-6">
               {/* Left: Logo */}
               <div className="flex-shrink-0 flex items-center justify-center">
