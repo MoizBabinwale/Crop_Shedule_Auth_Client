@@ -97,6 +97,8 @@ const QuatationGen = () => {
     return { ml, l };
   };
 
+  const formatWaterAmount = (value) => parseFloat(Number(value).toFixed(2));
+
   const buildEnglishInstruction = (week) => {
     const products = Object.values(week.products || {}).filter((p) => p.categoryKey !== "leaf_smoke");
 
@@ -117,7 +119,7 @@ const QuatationGen = () => {
       prefix: "Mix ",
       highlighted: `${productText} with ${water}`,
       suffix: ` of water to prepare the solution. Prepare the mixture by mixing with water. ${extraLine}`,
-      totalWater: week.totalWater ? `— Total ${Number(week.totalWater).toFixed(2)} liter water required` : null,
+      totalWater: week.totalWater ? `— Total ${formatWaterAmount(week.totalWater)} liter water required` : null,
     };
   };
 
@@ -143,7 +145,7 @@ const QuatationGen = () => {
       highlighted: `${productText} ${water}`,
       // Use the extraLine instead of week.instructions
       suffix: ` पानी में मिलाकर घोल तैयार करें। ${extraLine}`,
-      totalWater: week.totalWater ? `— कुल ${Number(week.totalWater).toFixed(2)} लीटर पानी लगेगा` : null,
+      totalWater: week.totalWater ? `— कुल ${formatWaterAmount(week.totalWater)} लीटर पानी लगेगा` : null,
     };
   };
 
@@ -169,7 +171,7 @@ const QuatationGen = () => {
       highlighted: `${productText} ${water}`,
       // Use the extraLine instead of week.instructions
       suffix: ` પાણીમાં મિક્સ કરીને દ્રાવણ તૈયાર કરો. ${extraLine}`,
-      totalWater: week.totalWater ? `— કુલ ${Number(week.totalWater).toFixed(2)} લીટર પાણી લાગશે` : null,
+      totalWater: week.totalWater ? `— કુલ ${formatWaterAmount(week.totalWater)} લીટર પાણી લાગશે` : null,
     };
   };
 
@@ -192,7 +194,7 @@ const QuatationGen = () => {
       prefix: "",
       highlighted: `${productText} ${water}`,
       suffix: ` ਪਾਣੀ ਵਿੱਚ ਮਿਲਾ ਕੇ ਘੋਲ ਤਿਆਰ ਕਰੋ। ${extraLine}`,
-      totalWater: week.totalWater ? `— ਕੁੱਲ ${Number(week.totalWater).toFixed(2)} ਲੀਟਰ ਪਾਣੀ ਲੱਗੇਗਾ` : null,
+      totalWater: week.totalWater ? `— ਕੁੱਲ ${formatWaterAmount(week.totalWater)} ਲੀਟਰ ਪਾਣੀ ਲੱਗੇਗਾ` : null,
     };
   };
 
@@ -259,7 +261,7 @@ const QuatationGen = () => {
       highlighted: `${productText} ${water}`,
       // Use the extraLine instead of week.instructions
       suffix: ` पाणी मध्ये मिसळून द्रावण तयार करावे. ${extraLine}`,
-      totalWater: week.totalWater ? `— एकूण ${Number(week.totalWater).toFixed(2)} लीटर पाणी लागेल` : null,
+      totalWater: week.totalWater ? `— एकूण ${formatWaterAmount(week.totalWater)} लीटर पाणी लागेल` : null,
     };
   };
 
@@ -346,23 +348,55 @@ const QuatationGen = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 print:p-0 print:text-lg">
+    <div className="p-4 sm:p-6 md:p-8 print:p-0">
       <style>{`
+        @page {
+          size: A4 landscape;
+          margin: 0.7cm 1cm 0.35cm 1cm; /* top, right, bottom, left */
+        }
         @media print {
-
-          html,
           body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .print-area {
             margin: 0 !important;
             padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
           }
-
-          .print-area {
-            margin  : 15px 0px 0px 0px !important;
-            padding: 0 !important;
+          thead {
+            display: table-header-group;
           }
-
-          .print-header-repeating > div {
-            margin-top: 0 !important;
+          .week-block tfoot {
+            display: none !important;
+          }
+          .print-footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: block !important;
+            z-index: 20;
+            margin: 0 !important;
+            padding: 0 1cm 0.15cm 1cm !important;
+            box-sizing: border-box;
+          }
+          .print-footer p {
+            margin: 0 !important;
+            line-height: 1.1 !important;
+          }
+          .print-footer div {
+            margin: 0 !important;
+          }
+          .print-end-line {
+            display: block !important;
+            text-align: center;
+            margin: 0.08cm 0 0.05cm 0 !important;
+            line-height: 1.1 !important;
+          }
+          .print-footer-spacer {
+            display: none !important;
           }
         }
       `}</style>
@@ -397,7 +431,7 @@ const QuatationGen = () => {
       </div>
 
       {/* Main Print Area */}
-      <div className="print-area bg-white p-4 sm:p-6 rounded shadow-md text-sm border border-gray-300 print:p-0 print:border-0 print:shadow-none print:rounded-none print:page-break-before-auto print:mt-2">
+      <div className="print-area bg-white p-4 sm:p-6 rounded shadow-md text-sm border border-gray-300 print:border-0 print:shadow-none print:rounded-none print:page-break-before-auto ">
         {/* Header / Date Row */}
         <div className="flex justify-between items-start print:mt-5">
           <h3 className="text-green-700 font-semibold text-base mb-3  print:text-sm">{t.farmerDetails}</h3>
@@ -406,7 +440,7 @@ const QuatationGen = () => {
           </p>
         </div>
         {/* Header */}
-        <div className="flex items-start gap-4 px-4 py-2 print:px-1 print:py-0">
+        <div className="flex items-start gap-4 px-4 py-2 print:px-0 print:py-0">
           {/* ✅ Logo (VISIBLE EVERYWHERE) */}
           <div className="flex-shrink-0 hidden md:block">
             <img src={logo} alt="Parnanetra Logo" className="h-16 w-auto object-contain " />
@@ -423,7 +457,7 @@ const QuatationGen = () => {
 
             {/* Farmer Info */}
             <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse print:text-[12px]">
+              <table className="w-full text-sm border-collapse print:text-[17px]">
                 <tbody>
                   <tr className="block sm:table-row border-b sm:border-0">
                     <td className="font-semibold block sm:table-cell py-1">{t.farmer.name}:</td>
@@ -459,7 +493,7 @@ const QuatationGen = () => {
         </div>
         {/* Farmer Info */}
         {/* Screen Farmer Info (normal box) */}
-        <div className="my-2 p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block print:my-1 print:p-1 print:shadow-none">
+        <div className="my-2 p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block print:my-0 print:shadow-none">
           <div className="text-center font-bold text-base sm:text-lg border-b leading-snug print:text-sm">{t.header(quotation.cropName, quotation.acres)}</div>
         </div>
 
@@ -473,10 +507,10 @@ const QuatationGen = () => {
           </select>
         </div>
         {quotation.weeks.map((week, index) => (
-          <div key={index} className="week-block break-avoid py-2 overflow-x-auto print:overflow-visible print:w-full print:mt-5 print:mb-0" style={{ breakInside: "avoid" }}>
+          <div key={index} className="week-block break-avoid py-2 overflow-x-auto print:overflow-visible print:w-full print:mt-1 print:mb-0" style={{ breakInside: "avoid" }}>
             {/* HEADER REPEATS ON EVERY PAGE IN PRINT */}
             <div className="print-header-repeating hidden print:block print:page-break-after-avoid print:m-0 print:p-0">
-              <div className="px-4 py-2 border-b border-gray-300 bg-white text-[12px] leading-4 print:mb-2">
+              <div className="px-4 py-2 border-b border-gray-300 bg-white text-[12px] leading-4 print:mb-1">
                 {/* DATE AT TOP RIGHT */}
                 <div className="text-right text-[10px] text-slate-700 mb-2 pb-2 border-b border-gray-300">
                   <span className="font-semibold">{t.date}:</span> {new Date().toLocaleDateString("en-GB")}
@@ -488,7 +522,7 @@ const QuatationGen = () => {
                 </div>
 
                 {/* FARMER DETAILS IN 2 COLUMNS */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[11px] text-slate-800">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[11px] print:text-[20px] text-slate-800">
                   {/* Left Column */}
                   <div className="space-y-1">
                     <div>
@@ -520,7 +554,7 @@ const QuatationGen = () => {
               </div>
             </div>
 
-            <div className="print-header-space hidden print:block"></div>
+            {/* <div className="print-header-space hidden print:block"></div> */}
             <table className="table-auto min-w-[980px] border border-separate text-xs print:min-w-0 print:text-[14px] w-full print:mt-3" style={{ borderSpacing: "0 6px" }}>
               <thead className="bg-green-100 text-gray-900 print:table-header-group">
                 <tr>
@@ -553,8 +587,8 @@ const QuatationGen = () => {
                     <br />
                     {formatUseStartDay(week.useStartDay, language)}
                   </td>
-                  <td className="border px-2 py-1 break-words w-[220px] max-w-[220px]">
-                    <ul className="list-disc pl-4 space-y-1  ">
+                  <td className="border p-2">
+                    <ul className="list-disc pl-4 space-y-1">
                       {(week.products || []).map((prod, i) => (
                         <li key={i}>
                           <span className="font-medium">{prod.name}</span>
@@ -562,28 +596,28 @@ const QuatationGen = () => {
                       ))}
                     </ul>
                   </td>
-                  <td className="border px-2 py-1 print:hidden  break-words w-[90px] max-w-[150px] ">
+                  <td className="border p-2 print:hidden">
                     {(week.products || []).map((prod, i) =>
                       prod.perLitreMix ? (
-                        <div key={i} className="text-green-800">
+                        <div key={i}>
                           {prod.name}: <span className="text-blue-700 font-medium">{prod.perLitreMix * quotation.acres}</span>
                         </div>
                       ) : null,
                     )}
                   </td>
-                  <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{week.waterPerAcre} ltr</td>
-                  {/* <td className="border px-2 py-1 text-center">{week.totalAcres}</td> */}
-                  <td className="border px-2 py-1 text-center w-[60px] max-w-[150px]">{parseFloat(Number(week.totalWater).toFixed(2))} लीटर</td>
-                  <td className="border px-2 py-1 break-words">
-                    <ul className=" space-y-1  max-w-[250px]">
+                  <td className="border p-2 text-center">{week.waterPerAcre} ltr</td>
+                  <td className="border p-2 text-center">{formatWaterAmount(week.totalWater)} लीटर</td>
+                  <td className="border p-2">
+                    <ul className="space-y-1">
                       {(week.products || []).map((prod, i) => (
                         <li key={i}>
-                          <span className="font-medium">{prod.name}</span>:<br /> {prod.quantity.split("&")[0]}
+                          <span className="font-medium">{prod.name}</span>:<br />
+                          {prod.quantity.split("&")[0]}
                         </li>
                       ))}
                     </ul>
                   </td>
-                  <td className="border px-4 py-3 break-words align-top">
+                  <td className="border p-3 align-top">
                     {week.products &&
                       (() => {
                         const text = buildInstructionByLanguage(week, language);
@@ -609,8 +643,18 @@ const QuatationGen = () => {
           </div>
         ))}
 
+        <div className="print-end-line hidden print:block">
+          <p className="text-sm text-gray-600">--- End of Schedule ---</p>
+        </div>
+
+        <div className="print-footer print:block">
+          <div className="text-center text-xs border-t border-gray-300 bg-white py-1 px-3 shadow-sm">
+            📍 235 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +012 345 67890
+          </div>
+        </div>
+
         {/* Mobile View */}
-        <div className="block md:hidden space-y-4">
+        <div className="block md:hidden space-y-4 print:hidden mt-4">
           {quotation.weeks.map((week, index) => (
             <div key={index} className="bg-white border rounded-lg shadow-sm p-4">
               <div className="flex justify-between mb-2">
@@ -625,7 +669,7 @@ const QuatationGen = () => {
                 </p>
 
                 <p>
-                  <strong>{t.table.totalWater}:</strong> {week.totalWater} Ltr
+                  <strong>{t.table.totalWater}:</strong> {formatWaterAmount(week.totalWater)} Ltr
                 </p>
 
                 <div>
@@ -663,18 +707,6 @@ const QuatationGen = () => {
             </div>
           ))}
         </div>
-        {/* print:fixed print:bottom-0 print:left-0 print:right-0 */}
-        <div className="hidden print:block fixed bottom-0 left-0 right-0 text-center text-xs border-t border-gray-300 bg-white py-1">
-          📍 235 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +012 345 67890
-        </div>
-
-        {/* Shown only at the very end (last page) */}
-        {/* <div className="end-of-schedule text-center border-t border-gray-300 print:block"> */}
-        <p className="print:block hidden text-sm text-gray-600 text-center h-0 mt-1">--- End of Schedule ---</p>
-        {/* <p className="text-xs text-gray-500 mt-1">
-              Thank you for choosing <span className="font-semibold text-green-700">Parnanetra Ayurvedic Agro System</span>
-            </p> */}
-        {/* </div> */}
       </div>
     </div>
   );

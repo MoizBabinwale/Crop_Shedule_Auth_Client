@@ -90,8 +90,8 @@ const ScheduleView = () => {
                   <th className="border p-2">पानी/एकड़</th>
                   <th className="border p-2">कुल एकड़</th>
                   <th className="border p-2">पानी कुल</th>
-                  <th className="border p-2">उत्पाद (मिली/ग्राम)</th>
-                  <th className="border p-2">उत्पाद (लीटर/किग्रा)</th>
+                  {/* <th className="border p-2">उत्पाद (मिली/ग्राम)</th>
+                  <th className="border p-2">उत्पाद (लीटर/किग्रा)</th> */}
                   <th className="border p-2 w-[90px]">उपयोग दिन</th>
                   <th className="border p-2">उत्पाद</th>
                   <th className="border p-2 max-w-[250px] whitespace-normal text-left">निर्देश</th>
@@ -126,7 +126,7 @@ const ScheduleView = () => {
                   <td className="border p-2">{week.waterPerAcre}</td>
                   <td className="border p-2">{week.totalAcres}</td>
                   <td className="border p-2">{week.totalWater}</td>
-                  <td className="border p-2">
+                  {/* <td className="border p-2">
                     {(week.products || []).map((prod, i) => {
                       const mgPart = prod.quantity?.split("&")[0]?.trim() || "";
                       return <div key={i}>{mgPart.replace(/ml\/grm/i, "").trim()} ml/grm</div>;
@@ -138,7 +138,7 @@ const ScheduleView = () => {
                       const ltrPart = prod.quantity?.split("&")[1]?.trim() || "";
                       return <div key={i}>{ltrPart.replace(/ltr\/kg/i, "").trim()} ltr/kg</div>;
                     })}
-                  </td>
+                  </td> */}
 
                   <td className="border p-2">{week.useStartDay}</td>
                   <td className="border p-2 text-left">

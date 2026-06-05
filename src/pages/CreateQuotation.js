@@ -387,6 +387,7 @@ function CropList() {
                 <input
                   type="number"
                   placeholder="Acres"
+                  step="any"
                   className="border border-green-300 p-2 rounded-lg w-24 text-center focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={acreValues[crop._id] || ""}
                   onChange={(e) =>

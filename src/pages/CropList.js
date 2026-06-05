@@ -359,6 +359,10 @@ function CropList() {
     }
   }, []);
 
+  const canEdit = userData?.role === "admin" || userData?.canEditSchedule;
+  const canSee = userData?.role === "admin" || userData?.canSeeSchedule || userData?.canRemoveSchedule;
+  const canDelete = userData?.role === "admin" || userData?.canRemoveSchedule;
+
   return (
     <>
       {loading ? (
@@ -388,16 +392,18 @@ function CropList() {
               </select>
 
               {/* ➕ Add Button */}
-              <button
-                onClick={() => {
-                  setIsDialogOpen(true);
-                  setEditCropId(null);
-                  setNewCrop({ name: "", weeks: "", description: "" });
-                }}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md transition"
-              >
-                + Add Crop
-              </button>
+              {canEdit && (
+                <button
+                  onClick={() => {
+                    setIsDialogOpen(true);
+                    setEditCropId(null);
+                    setNewCrop({ name: "", weeks: "", description: "" });
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg shadow-md transition"
+                >
+                  + Add Crop
+                </button>
+              )}
             </div>
           </div>
 
@@ -413,9 +419,19 @@ function CropList() {
               >
                 {/* Crop Info */}
                 <div className="flex-1">
-                  <Link to={`/form1?name=${encodeURIComponent(crop.name)}&weeks=${crop.weeks}&id=${crop._id}`} className="text-lg font-semibold text-green-900 hover:underline">
-                    {crop.name} – {crop.weeks} weeks
-                  </Link>
+                  {canEdit ? (
+                    <Link to={`/form1?name=${encodeURIComponent(crop.name)}&weeks=${crop.weeks}&id=${crop._id}`} className="text-lg font-semibold text-green-900 hover:underline">
+                      {crop.name} – {crop.weeks} weeks
+                    </Link>
+                  ) : canSee ? (
+                    <Link to={`/schedule/${crop._id}`} className="text-lg font-semibold text-green-900 hover:underline">
+                      {crop.name} – {crop.weeks} weeks
+                    </Link>
+                  ) : (
+                    <div className="text-lg font-semibold text-green-900">
+                      {crop.name} – {crop.weeks} weeks
+                    </div>
+                  )}
                   {crop.description && <p className="text-sm text-gray-600 mt-1">{crop.description}</p>}
                 </div>
 
@@ -423,6 +439,7 @@ function CropList() {
                 <input
                   type="number"
                   placeholder="Acres"
+                  step="any"
                   className="border border-green-300 p-2 rounded-lg w-24 text-center focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={acreValues[crop._id] || ""}
                   onChange={(e) =>
@@ -480,16 +497,23 @@ function CropList() {
                     </button>
                   )}
 
-                  <button onClick={() => handleEdit(crop)} className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 p-2 rounded-full shadow" title="Edit Crop">
-                    <FaEdit />
-                  </button>
+                  {canEdit && (
+                    <button onClick={() => handleEdit(crop)} className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 p-2 rounded-full shadow" title="Edit Crop">
+                      <FaEdit />
+                    </button>
+                  )}
 
-                  <button onClick={() => handleDelete(crop._id)} className="bg-red-100 text-red-600 hover:bg-red-200 p-2 rounded-full shadow" title="Delete Crop">
-                    <FaTrash />
-                  </button>
-                  <button onClick={() => handleCopyCrop(crop._id)} className="bg-green-100 text-green-600 hover:bg-green-200 p-2 rounded-full shadow" title="Copy Crop">
-                    <FaCopy />
-                  </button>
+                  {canDelete && (
+                    <button onClick={() => handleDelete(crop._id)} className="bg-red-100 text-red-600 hover:bg-red-200 p-2 rounded-full shadow" title="Delete Crop">
+                      <FaTrash />
+                    </button>
+                  )}
+
+                  {canEdit && (
+                    <button onClick={() => handleCopyCrop(crop._id)} className="bg-green-100 text-green-600 hover:bg-green-200 p-2 rounded-full shadow" title="Copy Crop">
+                      <FaCopy />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             ))}

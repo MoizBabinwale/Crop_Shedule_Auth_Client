@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 const Home = () => {
   const { auth } = useAuth();
 
-  const canViewCropSchedules = auth.user?.role === "admin" || auth.user?.canEditSchedule;
+  const canViewCropSchedules = auth.user?.role === "admin" || auth.user?.canSeeSchedule || auth.user?.canEditSchedule || auth.user?.canRemoveSchedule;
 
   const services = [
     { title: "Crop Schedules", desc: "Plan week-wise crop care with organized schedules and product instructions.", icon: CalendarDays, to: "/croplists", visible: canViewCropSchedules },

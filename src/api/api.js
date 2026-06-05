@@ -50,7 +50,12 @@ export const submitData = async (cropId, schedule) => {
 
 export const editCropData = async (editCropId, newCrop) => {
   try {
-    const res = await axios.put(`${BASE_URL}/crop/${editCropId}`, newCrop);
+    const token = sessionStorage.getItem("token");
+    const res = await axios.put(`${BASE_URL}/crop/${editCropId}`, newCrop, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return res.data;
   } catch (error) {
@@ -85,7 +90,12 @@ export const addCropData = async (data) => {
 
 export const deleteCropById = async (id) => {
   try {
-    const res = await axios.delete(`${BASE_URL}/crop/${id}`);
+    const token = sessionStorage.getItem("token");
+    const res = await axios.delete(`${BASE_URL}/crop/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return res.data;
   } catch (error) {
@@ -118,7 +128,12 @@ export const deleteProductById = async (id) => {
 
 export const getSchedulesByCropId = async (cropId) => {
   try {
-    const res = await axios.get(`${BASE_URL}/schedule/get/${cropId}`);
+    const token = sessionStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/schedule/get/${cropId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (res) {
       return res.data;
     }
@@ -210,7 +225,12 @@ export const deleteQuotation = async (id) => {
 
 export const getScheduleBillByScheduleId = async (scheduleId) => {
   try {
-    const res = await axios.get(`${BASE_URL}/schedulebill/${scheduleId}`);
+    const token = sessionStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/schedulebill/${scheduleId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return res.data;
   } catch (error) {
@@ -222,7 +242,12 @@ export const getScheduleBillByScheduleId = async (scheduleId) => {
 
 export const createScheduleBill = async (payload) => {
   try {
-    const res = await axios.post(`${BASE_URL}/schedulebill`, payload);
+    const token = sessionStorage.getItem("token");
+    const res = await axios.post(`${BASE_URL}/schedulebill`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res;
   } catch (error) {
     console.error("Error creating schedule bill:", error);
@@ -251,7 +276,12 @@ export const getQuotationBillById = async (billId) => {
 };
 export const getScheduleById = async (scheduleId) => {
   try {
-    const res = await axios.get(`${BASE_URL}/schedule/${scheduleId}`);
+    const token = sessionStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/schedule/${scheduleId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (error) {
     console.error("Error getting schedule:", error);

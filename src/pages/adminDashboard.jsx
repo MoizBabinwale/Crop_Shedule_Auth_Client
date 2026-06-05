@@ -40,6 +40,9 @@ export default function AdminDashboard() {
   const token = sessionStorage.getItem("token");
 
   const currentRole = auth?.user?.role; // "admin" | "subadmin"
+  const currentViewAccess = auth?.user?.viewAccess || "none";
+  const visibleUsers = users.filter((u) => u._id !== currentAdmin?._id);
+  const canShowEmptyUsersState = currentRole === "admin" || currentViewAccess !== "none";
 
   // Fetch all users
   const getAllUsers = useCallback(async () => {
@@ -141,16 +144,28 @@ export default function AdminDashboard() {
     state: "",
     viewAccess: "none",
     canEditSchedule: false,
+    canSeeSchedule: false,
+    canRemoveSchedule: false,
   });
 
   const updateUserDetails = async () => {
     try {
       const res = await updateProfile(editForm, selectedUser._id);
       if (res) {
+        const updatedUser = res.user || null;
         setAlert({
           message: "User Updated Successfully!",
           type: "success",
         });
+
+        if (updatedUser && auth?.user?._id === updatedUser._id) {
+          setAuth({
+            ...auth,
+            user: updatedUser,
+          });
+          sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        }
+
         setEditUserModal(false);
         getAllUsers();
       }
@@ -173,6 +188,8 @@ export default function AdminDashboard() {
       state: user.state || "",
       viewAccess: user.viewAccess || "none",
       canEditSchedule: user.canEditSchedule || false,
+      canSeeSchedule: user.canSeeSchedule || false,
+      canRemoveSchedule: user.canRemoveSchedule || false,
     });
     setEditUserModal(true);
   };
@@ -268,31 +285,32 @@ export default function AdminDashboard() {
             <Loading />
           ) : (
             <div className="w-full overflow-x-auto border rounded-lg">
-              <table className="table-pro w-full text-left">
-                <thead>
-                  <tr>
-                    <th className="p-3 min-w-[140px]">Name</th>
-                    <th className="p-3 min-w-[180px]">Email</th>
-                    <th className="p-3 min-w-[80px]">Role</th>
-                    {isAdmin && <th className="p-3 min-w-[110px]">View Access</th>}
-                    {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule Edit</th>}
-                    <th className="p-3 text-center min-w-[90px]">Quotations</th>
-                    <th className="p-3 min-w-[100px]">Status</th>
-                    {isAdmin && <th className="p-3 text-center min-w-[140px]">Actions</th>}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {users.length <= 1 ? (
+              {canShowEmptyUsersState && (
+                <table className="table-pro w-full text-left">
+                  <thead>
                     <tr>
-                      <td colSpan="6" className="text-center p-4 text-gray-500">
-                        No users found.
-                      </td>
+                      <th className="p-3 min-w-[140px]">Name</th>
+                      <th className="p-3 min-w-[180px]">Email</th>
+                      <th className="p-3 min-w-[80px]">Role</th>
+                      {isAdmin && <th className="p-3 min-w-[110px]">View Access</th>}
+                      {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule Edit</th>}
+                      {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule View</th>}
+                      {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule Remove</th>}
+                      <th className="p-3 text-center min-w-[90px]">Quotations</th>
+                      <th className="p-3 min-w-[100px]">Status</th>
+                      {isAdmin && <th className="p-3 text-center min-w-[140px]">Actions</th>}
                     </tr>
-                  ) : (
-                    users
-                      .filter((u) => u._id !== currentAdmin?._id)
-                      .map((u) => (
+                  </thead>
+
+                  <tbody>
+                    {visibleUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={isAdmin ? 10 : 5} className="text-center p-4 text-gray-500">
+                          No users found.
+                        </td>
+                      </tr>
+                    ) : (
+                      visibleUsers.map((u) => (
                         <tr key={u._id} className="border-b hover:bg-green-50 transition">
                           {/* NAME */}
                           <td className="p-3 font-medium text-gray-800 min-w-[140px]">{u.name}</td>
@@ -321,11 +339,31 @@ export default function AdminDashboard() {
                             </td>
                           )}
 
+                          {isAdmin && (
+                            <td className="p-3 text-center min-w-[100px]">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canSeeSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                              >
+                                {u.canSeeSchedule ? "Yes" : "No"}
+                              </span>
+                            </td>
+                          )}
+
+                          {isAdmin && (
+                            <td className="p-3 text-center min-w-[100px]">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canRemoveSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                              >
+                                {u.canRemoveSchedule ? "Yes" : "No"}
+                              </span>
+                            </td>
+                          )}
+
                           {/* QUOTATIONS COUNT */}
                           <td className="p-3 text-center font-bold text-green-700 min-w-[90px]">{u.totalQuotations || 0}</td>
 
                           {/* STATUS */}
-                          <td className="p-3 min-w-[100px]">{u.approved ? <span className="text-green-700 font-bold">Approved ✔</span> : <span className="text-red-600 font-bold">Pending ✖</span>}</td>
+                          <td className="p-3 min-w-[100px]">{u.approved ? <span className="text-green-700 font-bold"> ✔</span> : <span className="text-red-600 font-bold"> ✖</span>}</td>
 
                           {/* ACTIONS */}
                           {isAdmin && (
@@ -371,9 +409,10 @@ export default function AdminDashboard() {
                           )}
                         </tr>
                       ))
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
           )}
         </div>
@@ -450,8 +489,18 @@ export default function AdminDashboard() {
               </select>
 
               <label className="flex items-center gap-2 rounded border p-2 bg-white">
+                <input type="checkbox" checked={editForm.canSeeSchedule} onChange={(e) => setEditForm({ ...editForm, canSeeSchedule: e.target.checked })} />
+                <span className="text-sm">Can see schedules</span>
+              </label>
+
+              <label className="flex items-center gap-2 rounded border p-2 bg-white">
                 <input type="checkbox" checked={editForm.canEditSchedule} onChange={(e) => setEditForm({ ...editForm, canEditSchedule: e.target.checked })} />
                 <span className="text-sm">Can edit schedules</span>
+              </label>
+
+              <label className="flex items-center gap-2 rounded border p-2 bg-white">
+                <input type="checkbox" checked={editForm.canRemoveSchedule} onChange={(e) => setEditForm({ ...editForm, canRemoveSchedule: e.target.checked })} />
+                <span className="text-sm">Can remove schedules</span>
               </label>
 
               <input placeholder="Place" value={editForm.place} onChange={(e) => setEditForm({ ...editForm, place: e.target.value })} className="p-2 border rounded" />

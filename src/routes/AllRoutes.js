@@ -76,7 +76,7 @@ const AllRoutes = () => {
       <Route
         path="/form1"
         element={
-          <ProtectedRoute roles={["admin", "subadmin"]}>
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canEditSchedule}>
             <Form1 />
           </ProtectedRoute>
         }
@@ -85,7 +85,7 @@ const AllRoutes = () => {
       <Route
         path="/schedule/:cropId"
         element={
-          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canEditSchedule}>
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canSeeSchedule || user.canEditSchedule || user.canRemoveSchedule}>
             <ScheduleView />
           </ProtectedRoute>
         }
@@ -95,7 +95,7 @@ const AllRoutes = () => {
       <Route
         path="/croplists"
         element={
-          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canEditSchedule}>
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canSeeSchedule || user.canEditSchedule || user.canRemoveSchedule}>
             <CropList />
           </ProtectedRoute>
         }
@@ -119,8 +119,22 @@ const AllRoutes = () => {
       <Route path="/bills" element={<BillsPage />} />
 
       <Route path="/bill/:billId" element={<QuotationBill />} />
-      <Route path="/scheduleBill/:scheduleId" element={<ScheduleBill />} />
-      <Route path="/scheduleBill/view/:scheduleId" element={<ScheduleBillView />} />
+      <Route
+        path="/scheduleBill/:scheduleId"
+        element={
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canSeeSchedule || user.canEditSchedule || user.canRemoveSchedule}>
+            <ScheduleBill />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/scheduleBill/view/:scheduleId"
+        element={
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canSeeSchedule || user.canEditSchedule || user.canRemoveSchedule}>
+            <ScheduleBillView />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/quotationBill/view/:quotationId" element={<QuotationBill />} />
       <Route path="/gallery" element={<GalleryPage />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
