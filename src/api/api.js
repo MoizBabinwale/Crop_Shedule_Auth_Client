@@ -188,6 +188,21 @@ export const getAllQuotations = async () => {
   }
 };
 
+export const getQuotationCalendarFeed = async () => {
+  try {
+    const token = sessionStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/quotations/calendar`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data.quotations || [];
+  } catch (error) {
+    console.error("Error fetching quotation calendar feed:", error);
+    throw error;
+  }
+};
+
 export const getQuotationById = async (id) => {
   try {
     const res = await axios.get(`${BASE_URL}/quotations/${id}`);
@@ -447,6 +462,21 @@ export const removeCalendarSync = async (quotationId) => {
   const res = await axios.delete(
     `${BASE_URL}/quotations/${quotationId}/calendar-sync`,
 
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return res.data;
+};
+
+export const sendQuotationWhatsAppAlert = async (quotationId, weekNumber) => {
+  const token = sessionStorage.getItem("token");
+  const res = await axios.post(
+    `${BASE_URL}/quotations/${quotationId}/whatsapp-alert`,
+    { weekNumber },
     {
       headers: {
         Authorization: `Bearer ${token}`,

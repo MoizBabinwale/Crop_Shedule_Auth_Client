@@ -43,6 +43,7 @@ export default function AdminDashboard() {
   const currentViewAccess = auth?.user?.viewAccess || "none";
   const visibleUsers = users.filter((u) => u._id !== currentAdmin?._id);
   const canShowEmptyUsersState = currentRole === "admin" || currentViewAccess !== "none";
+  const canAccessQuotationCalendar = auth?.user?.role === "admin" || auth?.user?.canAccessQuotationCalendar;
 
   // Fetch all users
   const getAllUsers = useCallback(async () => {
@@ -146,6 +147,7 @@ export default function AdminDashboard() {
     canEditSchedule: false,
     canSeeSchedule: false,
     canRemoveSchedule: false,
+    canAccessQuotationCalendar: false,
   });
 
   const updateUserDetails = async () => {
@@ -190,6 +192,7 @@ export default function AdminDashboard() {
       canEditSchedule: user.canEditSchedule || false,
       canSeeSchedule: user.canSeeSchedule || false,
       canRemoveSchedule: user.canRemoveSchedule || false,
+      canAccessQuotationCalendar: user.canAccessQuotationCalendar || false,
     });
     setEditUserModal(true);
   };
@@ -273,14 +276,25 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-          <div className="mb-5 w-full rounded-2xl border border-green-900/10 bg-white p-5 shadow-sm sm:max-w-md">
-            {" "}
-            <h2 className="font-bold text-xl text-green-700 mb-2">📄 Quotations</h2> <p className="text-gray-700">Check your generated quotations.</p>{" "}
-            <button onClick={() => navigate("/quotation/master")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+          <div className="flex justify-start ">
+            <div className="mb-5 w-full rounded-2xl border border-green-900/10 bg-white p-5 shadow-sm sm:max-w-md mr-3">
               {" "}
-              View Quotations{" "}
-            </button>{" "}
-          </div>{" "}
+              <h2 className="font-bold text-xl text-green-700 mb-2">📄 Quotations</h2> <p className="text-gray-700">Check your generated quotations.</p>{" "}
+              <button onClick={() => navigate("/quotation/master")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                {" "}
+                View Quotations{" "}
+              </button>{" "}
+            </div>{" "}
+            {canAccessQuotationCalendar && (
+              <div className="mb-5 w-full rounded-2xl border border-green-900/10 bg-white p-5 shadow-sm sm:max-w-md">
+                <h2 className="font-bold text-xl text-green-700 mb-2">🗓️ Quotation Calendar</h2>
+                <p className="text-gray-700">See quotation dates, farmer details, instructions, and send WhatsApp alerts from one place.</p>
+                <button onClick={() => navigate("/quotation/calendar")} className="mt-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                  Open Calendar
+                </button>
+              </div>
+            )}
+          </div>
           {loading ? (
             <Loading />
           ) : (
@@ -289,15 +303,16 @@ export default function AdminDashboard() {
                 <table className="table-pro w-full text-left">
                   <thead>
                     <tr>
-                      <th className="p-3 min-w-[140px]">Name</th>
-                      <th className="p-3 min-w-[180px]">Email</th>
-                      <th className="p-3 min-w-[80px]">Role</th>
-                      {isAdmin && <th className="p-3 min-w-[110px]">View Access</th>}
-                      {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule Edit</th>}
-                      {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule View</th>}
-                      {isAdmin && <th className="p-3 text-center min-w-[100px]">Schedule Remove</th>}
-                      <th className="p-3 text-center min-w-[90px]">Quotations</th>
-                      <th className="p-3 min-w-[100px]">Status</th>
+                      <th className="p-3 min-w-[140px] text-center">Name</th>
+                      <th className="p-3 min-w-[180px] text-center">Email</th>
+                      <th className="p-3 min-w-[80px] text-center">Role</th>
+                      {isAdmin && <th className="p-3 min-w-[110px] text-center">View Access</th>}
+                      {isAdmin && <th className="p-2 min-w-[72px] text-center">Edit</th>}
+                      {isAdmin && <th className="p-2 text-center min-w-[72px]">View</th>}
+                      {isAdmin && <th className="p-2 text-center min-w-[92px]">Calendar</th>}
+                      {isAdmin && <th className="p-2 text-center min-w-[72px]">Remove</th>}
+                      <th className="p-3 text-center min-w-[80px]">Quotations</th>
+                      <th className="p-3 min-w-[100px] text-center">Status</th>
                       {isAdmin && <th className="p-3 text-center min-w-[140px]">Actions</th>}
                     </tr>
                   </thead>
@@ -341,10 +356,18 @@ export default function AdminDashboard() {
 
                           {isAdmin && (
                             <td className="p-3 text-center min-w-[100px]">
-                              <span
-                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canSeeSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                              >
+                              <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canSeeSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                                 {u.canSeeSchedule ? "Yes" : "No"}
+                              </span>
+                            </td>
+                          )}
+
+                          {isAdmin && (
+                            <td className="p-3 text-center min-w-[120px]">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canAccessQuotationCalendar ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                              >
+                                {u.canAccessQuotationCalendar ? "Yes" : "No"}
                               </span>
                             </td>
                           )}
@@ -495,12 +518,17 @@ export default function AdminDashboard() {
 
               <label className="flex items-center gap-2 rounded border p-2 bg-white">
                 <input type="checkbox" checked={editForm.canEditSchedule} onChange={(e) => setEditForm({ ...editForm, canEditSchedule: e.target.checked })} />
-                <span className="text-sm">Can edit schedules</span>
+                <span className="text-sm">Generate schedules</span>
               </label>
 
               <label className="flex items-center gap-2 rounded border p-2 bg-white">
                 <input type="checkbox" checked={editForm.canRemoveSchedule} onChange={(e) => setEditForm({ ...editForm, canRemoveSchedule: e.target.checked })} />
                 <span className="text-sm">Can remove schedules</span>
+              </label>
+
+              <label className="flex items-center gap-2 rounded border p-2 bg-white">
+                <input type="checkbox" checked={editForm.canAccessQuotationCalendar} onChange={(e) => setEditForm({ ...editForm, canAccessQuotationCalendar: e.target.checked })} />
+                <span className="text-sm">Can access quotation calendar</span>
               </label>
 
               <input placeholder="Place" value={editForm.place} onChange={(e) => setEditForm({ ...editForm, place: e.target.value })} className="p-2 border rounded" />

@@ -13,13 +13,18 @@ const QuatationGen = () => {
   const { quatationId } = useParams();
   const [quotation, setQuotation] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [language, setLanguage] = useState("mr"); // "mr" | "en"
+  const [language, setLanguage] = useState(() => localStorage.getItem("quotationLanguage") || "mr"); // "mr" | "en"
   const t = translations[language] || translations.mr;
 
   const [removingCalendar, setRemovingCalendar] = useState(false);
 
   const { auth } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem("quotationLanguage", language);
+  }, [language]);
+
   useEffect(() => {
     const fetchQuotation = async () => {
       try {
@@ -489,16 +494,33 @@ const QuatationGen = () => {
                 </tbody>
               </table>
             </div>
+
+            {quotation.createdBy && (
+              <div className="flex justify-end">
+                <div className="mt-1 rounded border border-green-200 bg-green-50 px-3 py-2 print:border-0 print:bg-none print:my-1 flex justify-normal gap-4 w-fit ">
+                  <div className="text-base font-semibold text-green-700">{t.createdBy}</div>
+                  <div className="text-base font-medium text-gray-800">
+                    {t.name} : {quotation.createdBy.name || "-"}
+                  </div>
+                  <div className="text-base text-gray-600">
+                    {t.farmer.email} : {quotation.createdBy.email || "-"}
+                  </div>
+                  <div className="text-base text-gray-600">
+                    {t.farmer.number} : {quotation.createdBy.number || "-"}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {/* Farmer Info */}
         {/* Screen Farmer Info (normal box) */}
-        <div className="my-2 p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block print:my-0 print:shadow-none">
+        <div className=" p-3 bg-green-50 border border-green-200 rounded-lg shadow-sm text-sm leading-relaxed text-gray-800 block print:my-0 print:shadow-none">
           <div className="text-center font-bold text-base sm:text-lg border-b leading-snug print:text-sm">{t.header(quotation.cropName, quotation.acres)}</div>
         </div>
 
         <div className="flex justify-end mb-3 print:hidden">
-          <select value={language} onChange={(e) => setLanguage(e.target.value)} className="border border-green-500 rounded-md px-3 py-1 text-sm focus:outline-none">
+          <select value={language} onChange={(e) => setLanguage(e.target.value)} className="mt-1 border border-green-500 rounded-md px-3 py-1 text-sm focus:outline-none">
             <option value="mr">मराठी</option>
             <option value="en">English</option>
             <option value="hi">हिंदी</option>
@@ -509,50 +531,7 @@ const QuatationGen = () => {
         {quotation.weeks.map((week, index) => (
           <div key={index} className="week-block break-avoid py-2 overflow-x-auto print:overflow-visible print:w-full print:mt-1 print:mb-0" style={{ breakInside: "avoid" }}>
             {/* HEADER REPEATS ON EVERY PAGE IN PRINT */}
-            <div className="print-header-repeating hidden print:block print:page-break-after-avoid print:m-0 print:p-0">
-              <div className="px-4 py-2 border-b border-gray-300 bg-white text-[12px] leading-4 print:mb-1">
-                {/* DATE AT TOP RIGHT */}
-                <div className="text-right text-[10px] text-slate-700 mb-2 pb-2 border-b border-gray-300">
-                  <span className="font-semibold">{t.date}:</span> {new Date().toLocaleDateString("en-GB")}
-                </div>
-
-                {/* CENTERED CROP HEADING */}
-                <div className="text-center mb-3 py-1">
-                  <span className="font-bold text-sm text-green-700">{t.header(quotation.cropName, quotation.acres)}</span>
-                </div>
-
-                {/* FARMER DETAILS IN 2 COLUMNS */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[11px] print:text-[20px] text-slate-800">
-                  {/* Left Column */}
-                  <div className="space-y-1">
-                    <div>
-                      <span className="font-semibold">{t.farmer.name}:</span> {quotation.farmerInfo?.name || "-"}
-                    </div>
-                    <div>
-                      <span className="font-semibold">{t.farmer.number}:</span> {quotation.farmerInfo?.number || "-"}
-                    </div>
-                    <div>
-                      <span className="font-semibold">{t.farmer.email}:</span> {quotation.farmerInfo?.email || "-"}
-                    </div>
-                    <div>
-                      <span className="font-semibold">{t.farmer.place}:</span> {quotation.farmerInfo?.place || "-"}
-                    </div>
-                  </div>
-                  {/* Right Column */}
-                  <div className="space-y-1">
-                    <div>
-                      <span className="font-semibold">{t.farmer.tahsil}:</span> {quotation.farmerInfo?.tahsil || "-"}
-                    </div>
-                    <div>
-                      <span className="font-semibold">{t.farmer.district}:</span> {quotation.farmerInfo?.district || "-"}
-                    </div>
-                    <div>
-                      <span className="font-semibold">{t.farmer.state}:</span> {quotation.farmerInfo?.state || "-"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Farmer Info - Top Right on Every Printed Page */}
 
             {/* <div className="print-header-space hidden print:block"></div> */}
             <table className="table-auto min-w-[980px] border border-separate text-xs print:min-w-0 print:text-[14px] w-full print:mt-3" style={{ borderSpacing: "0 6px" }}>
@@ -605,8 +584,12 @@ const QuatationGen = () => {
                       ) : null,
                     )}
                   </td>
-                  <td className="border p-2 text-center">{week.waterPerAcre} ltr</td>
-                  <td className="border p-2 text-center">{formatWaterAmount(week.totalWater)} लीटर</td>
+                  <td className="border p-2 text-center">
+                    {week.waterPerAcre} {t.unit?.liter || "ltr"}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {formatWaterAmount(week.totalWater)} {t.unit?.liter || "ltr"}
+                  </td>
                   <td className="border p-2">
                     <ul className="space-y-1">
                       {(week.products || []).map((prod, i) => (
@@ -622,7 +605,7 @@ const QuatationGen = () => {
                       (() => {
                         const text = buildInstructionByLanguage(week, language);
                         return (
-                          <p className="text-[15px] font-medium leading-7 text-green-950 print:text-[14px] print:leading-7">
+                          <p className="text-[15px] font-medium leading-7 text-green-950 print:text-[17px] print:leading-7">
                             {text.prefix}
                             <span className="font-bold">{text.highlighted}</span>
                             {text.suffix}
@@ -649,7 +632,9 @@ const QuatationGen = () => {
 
         <div className="print-footer print:block">
           <div className="text-center text-xs border-t border-gray-300 bg-white py-1 px-3 shadow-sm">
-            📍 235 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +012 345 67890
+            📍 235 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +91 9226258656 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <strong>{t.farmer.name}:</strong> {quotation.farmerInfo?.name} &nbsp;&nbsp;&nbsp;
+            <strong>{t.farmer.number}:</strong> {quotation.farmerInfo?.number}
           </div>
         </div>
 

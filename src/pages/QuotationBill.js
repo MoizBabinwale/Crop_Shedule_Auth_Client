@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import { getQuotationBillById } from "../api/api";
 import { useParams } from "react-router-dom";
 import Loading from "../components/Loading";
+import translations from "../utils/translations";
 
 import logo from "../assets/logo.jpg";
 
 const QuotationBill = () => {
   const { quotationId } = useParams();
   const [billData, setBillData] = useState(null);
+  const [language] = useState(() => localStorage.getItem("quotationLanguage") || "mr");
+
+  const t = translations[language] || translations.mr;
 
   useEffect(() => {
     const fetchBill = async () => {
@@ -72,7 +76,7 @@ const QuotationBill = () => {
       </div>
     );
 
-  const { cropName, billDate, farmerInfo, items = [], additionalInfo = {} } = billData;
+  const { cropName, farmerInfo, items = [], additionalInfo = {} } = billData;
 
   return (
     <div className="pt-4 px-4 mb-6 w-full print:p-2 print:mb-0 bg-white border border-green-300 rounded shadow text-sm">
@@ -87,83 +91,67 @@ const QuotationBill = () => {
             🖨️ Print
           </button>
         </div>
-        <h2 className="text-2xl font-bold ml-2 my-2 text-green-900"> फसल का नाम : {cropName}</h2>
-
-        <div className="border-t border-b border-green-500  py-3 text-sm">
-          {/* Top row with date on the right */}
-          <div className="flex justify-between items-start print:hidden mb-3">
-            <h3 className="text-green-700 font-semibold text-base mb-3">👨‍🌾 शेतकरी माहिती (Farmer Details)</h3>
-            <p className=" print:hidden font-bold text-right">दिनांक: {new Date(billDate).toLocaleDateString("en-GB")}</p>
-          </div>
-
-          <div className="hidden print:block py-2 bg-white border-b border-gray-300">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 px-6">
-              {/* Left: Logo */}
-              <div className="flex-shrink-0 flex items-center justify-center">
-                <img src={logo} alt="Parnanetra Logo" className="h-20 w-auto object-contain print:h-16" />
+        <h2 className="text-2xl font-bold ml-2 my-2 text-green-900"> {t.header(cropName, billData.acres)}</h2>
+        <div className="hidden print:block py-2 bg-white border-b border-gray-300">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 px-6">
+            <div className="flex-shrink-0 flex items-center justify-center">
+              <img src={logo} alt="Parnanetra Logo" className="h-20 w-auto object-contain print:h-16" />
+            </div>
+            <div className="flex flex-col w-full">
+              <div className="text-center sm:text-left mb-2">
+                <span className="text-sm font-bold leading-tight">
+                  <span className="text-green-700">Parnanetra</span> Ayurvedic Agro System
+                </span>
               </div>
-
-              {/* Right: Company Name + Farmer Info */}
-              <div className="flex flex-col w-full">
-                {/* Company Name */}
-                <div className="text-center sm:text-left mb-2">
-                  <span className="text-sm font-bold leading-tight">
-                    <span className="text-green-700">Parnanetra</span> Ayurvedic Agro System
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                <span>
+                  <span className="font-medium">{t.farmer.name}:</span> {farmerInfo?.name}
+                </span>
+                <span>
+                  <span className=" font-bold text-right">
+                    {t.date}: {new Date().toLocaleDateString("en-GB")}
                   </span>
-                </div>
-
-                {/* Farmer Info Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-                  <span>
-                    <span className="font-medium">शेतकरी नाव (Name):</span> {farmerInfo?.name}
-                  </span>
-                  <span>
-                    <span className=" font-bold text-right">दिनांक: {new Date().toLocaleDateString("en-GB")}</span>
-                  </span>
-                  <span>
-                    <span className="font-medium">गाव (Place):</span> {farmerInfo?.place}
-                  </span>
-                  <span>
-                    <span className="font-medium">तालुका (Tahsil):</span> {farmerInfo?.tahsil}
-                  </span>
-                  <span>
-                    <span className="font-medium">जिल्हा (District):</span> {farmerInfo?.district}
-                  </span>
-                  <span>
-                    <span className="font-medium">राज्य (State):</span> {farmerInfo?.state}
-                  </span>
-                </div>
+                </span>
+                <span>
+                  <span className="font-medium">{t.farmer.place}:</span> {farmerInfo?.place}
+                </span>
+                <span>
+                  <span className="font-medium">{t.farmer.tahsil}:</span> {farmerInfo?.tahsil}
+                </span>
+                <span>
+                  <span className="font-medium">{t.farmer.district}:</span> {farmerInfo?.district}
+                </span>
+                <span>
+                  <span className="font-medium">{t.farmer.state}:</span> {farmerInfo?.state}
+                </span>
               </div>
             </div>
           </div>
-          {/* Spacer for print header to avoid overlap */}
-          {/* <div className="hidden print:block h- 28"></div> */}
+        </div>
 
-          {/* Farmer info */}
-          <div className="print:hidden   grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-            <p>
-              <span className="font-medium">शेतकरी नाव (Name):</span> {farmerInfo?.name}
-            </p>
-            <p>
-              <span className="font-medium">गाव (Place):</span> {farmerInfo?.place}
-            </p>
-            <p>
-              <span className="font-medium">तालुका (Tahsil):</span> {farmerInfo?.tahsil}
-            </p>
-            <p>
-              <span className="font-medium">जिल्हा (District):</span> {farmerInfo?.district}
-            </p>
-            <p>
-              <span className="font-medium">राज्य (State):</span> {farmerInfo?.state}
-            </p>
-            <p>
-              <strong>एकूण क्षेत्रफळ:</strong> {billData.acres} एकर ({additionalInfo?.totalPlants} रोपे)
-            </p>
-          </div>
+        <div className="print:hidden grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+          <p>
+            <span className="font-medium">{t.farmer.name}:</span> {farmerInfo?.name}
+          </p>
+          <p>
+            <span className="font-medium">{t.farmer.place}:</span> {farmerInfo?.place}
+          </p>
+          <p>
+            <span className="font-medium">{t.farmer.tahsil}:</span> {farmerInfo?.tahsil}
+          </p>
+          <p>
+            <span className="font-medium">{t.farmer.district}:</span> {farmerInfo?.district}
+          </p>
+          <p>
+            <span className="font-medium">{t.farmer.state}:</span> {farmerInfo?.state}
+          </p>
+          <p>
+            <strong>एकूण क्षेत्रफळ:</strong> {billData.acres} एकर ({additionalInfo?.totalPlants} रोपे)
+          </p>
         </div>
 
         {/* Product Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mt-2">
           <table className="w-full table-auto border border-green-500 text-center">
             <thead className="bg-green-100">
               <tr>
@@ -234,7 +222,7 @@ const QuotationBill = () => {
           <GroupedCost title="🔥 खेत पर पत्तों से धुवा की लागत" data={additionalInfo.smokeCost} />
         </div>
       </div>
-      <div className="hidden print:block text-center text-xs border-t border-gray-300 mt-6 pt-2">📍 235 Gov. Press Colony DABHA, Nagpur, 440023 | ✉️ info@parnanetra.org | 📞 +012 345 67890</div>
+      <div className="hidden print:block text-center text-xs border-t border-gray-300 mt-6 pt-2">📍 235 Gov. Press Colony DABHA, Nagpur, 440023 | ✉️ info@parnanetra.org | 📞 +91 9226258656</div>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import Form1 from "../components/Form1.js";
 import ProductList from "../pages/ProductList.js";
 import QuatationGen from "../pages/QuatationGen.js";
 import QuotationMaster from "../pages/QuotationMaster.jsx";
+import QuotationCalendar from "../pages/QuotationCalendar.jsx";
 import QuotationBill from "../pages/QuotationBill.js";
 import ScheduleBill from "../pages/ScheduleBill.js";
 import ScheduleBillView from "../components/ScheduleBilView.js";
@@ -113,6 +114,14 @@ const AllRoutes = () => {
         element={
           <ProtectedRoute>
             <QuotationMaster />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/quotation/calendar"
+        element={
+          <ProtectedRoute roles={["admin", "subadmin"]} permission={(user) => user.role === "admin" || user.canAccessQuotationCalendar}>
+            <QuotationCalendar />
           </ProtectedRoute>
         }
       />

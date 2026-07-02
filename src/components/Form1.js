@@ -56,8 +56,10 @@ const Form1 = () => {
     };
 
     init();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cropId, productsLoaded]);
+
+  const navigate = useNavigate();
 
   const fetchProducts = async () => {
     const data = await getProductList();
@@ -337,7 +339,10 @@ const Form1 = () => {
         });
 
         setWeekForms(formattedWeeks);
-        setIsBillReady(true);
+        if (res?.scheduleBillId) {
+          setIsBillReady(true);
+        }
+
         setScheduleId(res._id);
 
         if (res.totalPlants) {
@@ -374,8 +379,6 @@ const Form1 = () => {
       toast.error(error?.response?.data?.message || "Failed to generate quotation");
     }
   };
-
-  const navigate = useNavigate();
 
   const handleClick = () => {
     navigate(`/schedule/${cropId}`);

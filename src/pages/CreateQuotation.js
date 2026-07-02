@@ -264,6 +264,7 @@ function CropList() {
         weeks: updatedWeeks,
         farmerInfo: updatedFarmerData,
         scheduleId: selectedScheduleId,
+        createdBy: auth?.user?._id || JSON.parse(sessionStorage.getItem("user"))?._id || "",
       };
 
       const res = await createQuotation(quotationPayload);
