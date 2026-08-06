@@ -222,7 +222,7 @@ const QuotationBill = () => {
           <GroupedCost title="🔥 खेत पर पत्तों से धुवा की लागत" data={additionalInfo.smokeCost} />
         </div>
       </div>
-      <div className="hidden print:block text-center text-xs border-t border-gray-300 mt-6 pt-2">📍 235 Gov. Press Colony DABHA, Nagpur, 440023 | ✉️ info@parnanetra.org | 📞 +91 9226258656</div>
+      <div className="hidden print:block text-center text-xs border-t border-gray-300 mt-6 pt-2">📍 300 Gov. Press Colony DABHA, Nagpur, 440023 | ✉️ info@parnanetra.org | 📞 +91 9226258656</div>
     </div>
   );
 };

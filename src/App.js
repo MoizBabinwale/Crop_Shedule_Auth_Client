@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
 
@@ -18,6 +19,7 @@ function App() {
           <NotificationProvider>
             <Navbar />
             <AllRoutes />
+             <SpeedInsights />
           </NotificationProvider>
           <ToastContainer />
           <Footer />

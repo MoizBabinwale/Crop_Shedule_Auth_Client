@@ -98,7 +98,7 @@ export default function UserDashboard() {
 
   return (
     <div className="page-shell">
-      <div className="container-pro panel-pro max-w-5xl p-4 sm:p-6 lg:p-8">
+      <div className="container-pro panel-pro p-4 sm:p-6 lg:p-8">
         <h1 className="text-3xl font-bold text-green-700 mb-4">👨‍🌾 User Dashboard</h1>
 
         {user && (

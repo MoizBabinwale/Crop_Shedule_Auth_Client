@@ -13,7 +13,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import { useCallback } from "react";
 
 export default function AdminDashboard() {
-  const { auth, setAuth } = useAuth();
+  const { auth, setAuth, logout } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
 
@@ -139,6 +139,8 @@ export default function AdminDashboard() {
     number: "",
     role: "user",
     approved: false,
+    isActive: true,
+    status: "approved",
     place: "",
     tahsil: "",
     district: "",
@@ -161,11 +163,18 @@ export default function AdminDashboard() {
         });
 
         if (updatedUser && auth?.user?._id === updatedUser._id) {
+          const mustLogout = updatedUser.isActive === false || !updatedUser.approved;
+
           setAuth({
             ...auth,
             user: updatedUser,
           });
           sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+          if (mustLogout) {
+            logout();
+            return;
+          }
         }
 
         setEditUserModal(false);
@@ -184,6 +193,8 @@ export default function AdminDashboard() {
       number: user.number || "",
       role: user.role || "user",
       approved: user.approved || false,
+      isActive: user.isActive !== false,
+      status: user.isActive === false ? "non-active" : user.approved ? "approved" : "pending",
       place: user.place || "",
       tahsil: user.tahsil || "",
       district: user.district || "",
@@ -303,6 +314,7 @@ export default function AdminDashboard() {
                 <table className="table-pro w-full text-left">
                   <thead>
                     <tr>
+                      <th className="p-3 min-w-[40px] text-center"></th>
                       <th className="p-3 min-w-[140px] text-center">Name</th>
                       <th className="p-3 min-w-[180px] text-center">Email</th>
                       <th className="p-3 min-w-[80px] text-center">Role</th>
@@ -312,7 +324,7 @@ export default function AdminDashboard() {
                       {isAdmin && <th className="p-2 text-center min-w-[92px]">Calendar</th>}
                       {isAdmin && <th className="p-2 text-center min-w-[72px]">Remove</th>}
                       <th className="p-3 text-center min-w-[80px]">Quotations</th>
-                      <th className="p-3 min-w-[100px] text-center">Status</th>
+                      {/* <th className="p-3 min-w-[100px] text-center">Status</th> */}
                       {isAdmin && <th className="p-3 text-center min-w-[140px]">Actions</th>}
                     </tr>
                   </thead>
@@ -326,26 +338,44 @@ export default function AdminDashboard() {
                       </tr>
                     ) : (
                       visibleUsers.map((u) => (
-                        <tr key={u._id} className="border-b hover:bg-green-50 transition">
+                  <tr key={u._id} className="px-2 border-b hover:bg-green-50 transition">
+  <td className="w-6 p-1">
+  <div
+    className={`mx-auto h-[15px] w-[4px] rounded-full ${
+      u.isActive === false
+        ? "bg-red-600"
+        : u.approved
+        ? "bg-green-600"
+        : "bg-yellow-500"
+    }`}
+    title={
+      u.isActive === false
+        ? "Inactive"
+        : u.approved
+        ? "Approved"
+        : "Pending"
+    }
+  />
+</td>
                           {/* NAME */}
-                          <td className="p-3 font-medium text-gray-800 min-w-[140px]">{u.name}</td>
+                          <td className="p-1 font-medium text-gray-800 min-w-[140px]">{u.name}</td>
 
                           {/* EMAIL */}
-                          <td className="p-3 text-gray-700 min-w-[180px] break-words">{u.email}</td>
+                          <td className="p-1 text-gray-700 min-w-[180px] break-words">{u.email}</td>
 
                           {/* ROLE */}
-                          <td className="p-3 capitalize min-w-[80px]">
+                          <td className="p-1 capitalize min-w-[80px] text-center"> 
                             <span className="px-2 py-1 rounded-md bg-gray-200 text-sm font-semibold">{u.role}</span>
                           </td>
 
                           {isAdmin && (
-                            <td className="p-3 min-w-[110px]">
+                            <td className="p-1 min-w-[110px]  text-center">
                               <span className="text-sm font-semibold capitalize">{u.viewAccess || "none"}</span>
                             </td>
                           )}
 
                           {isAdmin && (
-                            <td className="p-3 text-center min-w-[100px]">
+                            <td className="p-1 text-center min-w-[100px]">
                               <span
                                 className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canEditSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                               >
@@ -355,7 +385,7 @@ export default function AdminDashboard() {
                           )}
 
                           {isAdmin && (
-                            <td className="p-3 text-center min-w-[100px]">
+                            <td className="p-1 text-center min-w-[100px]">
                               <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canSeeSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                                 {u.canSeeSchedule ? "Yes" : "No"}
                               </span>
@@ -363,7 +393,7 @@ export default function AdminDashboard() {
                           )}
 
                           {isAdmin && (
-                            <td className="p-3 text-center min-w-[120px]">
+                            <td className="p-1 text-center min-w-[120px]">
                               <span
                                 className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canAccessQuotationCalendar ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                               >
@@ -373,7 +403,7 @@ export default function AdminDashboard() {
                           )}
 
                           {isAdmin && (
-                            <td className="p-3 text-center min-w-[100px]">
+                            <td className="p-1 text-center min-w-[100px]">
                               <span
                                 className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${u.canRemoveSchedule ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                               >
@@ -383,15 +413,22 @@ export default function AdminDashboard() {
                           )}
 
                           {/* QUOTATIONS COUNT */}
-                          <td className="p-3 text-center font-bold text-green-700 min-w-[90px]">{u.totalQuotations || 0}</td>
+                          <td className="p-1 text-center font-bold text-green-700 min-w-[90px]">{u.totalQuotations || 0}</td>
 
                           {/* STATUS */}
-                          <td className="p-3 min-w-[100px]">{u.approved ? <span className="text-green-700 font-bold"> ✔</span> : <span className="text-red-600 font-bold"> ✖</span>}</td>
+                          {/* <td className="p-1 text-center min-w-[70px]">
+                            <div
+                              className={`mx-auto h-[15px] w-[15px] rounded-full ${
+                                u.isActive === false ? "bg-red-600" : u.approved ? "bg-green-600" : "bg-yellow-500"
+                              }`}
+                              title={u.isActive === false ? "Inactive" : u.approved ? "Approved" : "Pending"}
+                            />
+                          </td> */}
 
                           {/* ACTIONS */}
                           {isAdmin && (
-                            <td className="p-3 min-w-[140px]">
-                              <div className="flex items-center gap-2 flex-wrap">
+                            <td className="p-1 min-w-[140px] ">
+                              <div className="flex items-center gap-2 flex-wrap  justify-center d-flex">
                                 {/* Role Change */}
                                 {/* {canChangeRole(u) && (
                                   <select value={u.role} onChange={(e) => updateRole(u._id, e.target.value)} className="border px-2 py-1 rounded-md text-sm whitespace-nowrap">
@@ -494,36 +531,59 @@ export default function AdminDashboard() {
 
               <input placeholder="Mobile Number" value={editForm.number} onChange={(e) => setEditForm({ ...editForm, number: e.target.value })} className="p-2 border rounded" />
 
-              <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className="p-2 border rounded">
-                <option value="user">User</option>
-                <option value="subadmin">Sub Admin</option>
-                <option value="admin">Admin</option>
-              </select>
+              <label className="space-y-1">
+                <span className="font-semibold">Role</span>
+                <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className="p-2 border rounded w-full">
+                  <option value="user">User — basic access</option>
+                  <option value="subadmin">Sub Admin — schedule support</option>
+                  <option value="admin">Admin — full permissions</option>
+                </select>
+                <p className="text-xs text-gray-500">Choose the permission level for this user.</p>
+              </label>
 
-              <select value={editForm.approved} onChange={(e) => setEditForm({ ...editForm, approved: e.target.value === "true" })} className="p-2 border rounded">
-                <option value="true">Approved</option>
-                <option value="false">Pending</option>
-              </select>
+              <label className="space-y-1">
+                <span className="font-semibold">Account status</span>
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                  className={`p-2 border rounded w-full ${
+                    editForm.status === "non-active"
+                      ? "bg-[#FEE2E2] text-[#991B1B] border-[#EF4444]"
+                      : editForm.status === "approved"
+                      ? "bg-green-100 text-green-800 border-green-300"
+                      : "bg-yellow-100 text-yellow-800 border-yellow-300"
+                  }`}
+                >
+                  <option value="approved">Approved & Active</option>
+                  <option value="pending">Pending approval</option>
+                  <option value="non-active">Non-active</option>
+                </select>
+                <p className="text-xs text-gray-500">Set whether the user can log in and whether their account is approved.</p>
+              </label>
 
-              <select value={editForm.viewAccess} onChange={(e) => setEditForm({ ...editForm, viewAccess: e.target.value })} className="p-2 border rounded">
-                <option value="none">No access</option>
-                <option value="all-users">All users</option>
-                <option value="subadmins">Subadmins only</option>
-              </select>
+              <label className="space-y-1">
+                <span className="font-semibold">User visibility</span>
+                <select value={editForm.viewAccess} onChange={(e) => setEditForm({ ...editForm, viewAccess: e.target.value })} className="p-2 border rounded w-full">
+                  <option value="none">No user list access</option>
+                  <option value="all-users">Can view all users</option>
+                  <option value="subadmins">Can view subadmins only</option>
+                </select>
+                <p className="text-xs text-gray-500">Control which users this user can see in the admin list.</p>
+              </label>
 
               <label className="flex items-center gap-2 rounded border p-2 bg-white">
                 <input type="checkbox" checked={editForm.canSeeSchedule} onChange={(e) => setEditForm({ ...editForm, canSeeSchedule: e.target.checked })} />
-                <span className="text-sm">Can see schedules</span>
+                <span className="text-sm">Can view schedules</span>
               </label>
 
               <label className="flex items-center gap-2 rounded border p-2 bg-white">
                 <input type="checkbox" checked={editForm.canEditSchedule} onChange={(e) => setEditForm({ ...editForm, canEditSchedule: e.target.checked })} />
-                <span className="text-sm">Generate schedules</span>
+                <span className="text-sm">Can create or update schedules</span>
               </label>
 
               <label className="flex items-center gap-2 rounded border p-2 bg-white">
                 <input type="checkbox" checked={editForm.canRemoveSchedule} onChange={(e) => setEditForm({ ...editForm, canRemoveSchedule: e.target.checked })} />
-                <span className="text-sm">Can remove schedules</span>
+                <span className="text-sm">Can delete schedules</span>
               </label>
 
               <label className="flex items-center gap-2 rounded border p-2 bg-white">

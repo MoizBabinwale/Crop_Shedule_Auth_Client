@@ -25,7 +25,7 @@ const Footer = () => {
           <div className="mt-5 space-y-3 text-sm text-green-50/85">
             <p className="flex items-start gap-3">
               <MapPin size={18} className="mt-0.5 shrink-0 text-amber-300" />
-              235, Govt. Press Colony, Dabha, Nagpur - 440023
+              300, Govt. Press Colony, Dabha, Nagpur - 440023
             </p>
             <p className="flex items-center gap-3">
               <Mail size={18} className="text-amber-300" />

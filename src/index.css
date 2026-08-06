@@ -162,7 +162,8 @@
 
   .table-pro td,
   .table-pro th {
-    padding: 13px 14px;
+    padding: 9px 4px;
+    /* padding: 13px 14px; */
   }
 
   .table-pro tbody tr {

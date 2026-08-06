@@ -97,6 +97,37 @@ export function AuthProvider({ children }) {
     }
   }, [auth]);
 
+  useEffect(() => {
+    if (!auth.isLoggedIn || !auth.token || !auth.user?._id) return undefined;
+
+    const intervalId = window.setInterval(async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        });
+
+        const freshUser = res.data;
+        sessionStorage.setItem("user", JSON.stringify(freshUser));
+
+        setAuth((prev) => ({
+          ...prev,
+          user: freshUser,
+        }));
+
+        const mustLogout = freshUser.isActive === false || !freshUser.approved;
+        if (mustLogout) {
+          logout();
+        }
+      } catch (error) {
+        console.error("Status refresh failed:", error);
+      }
+    }, 10000);
+
+    return () => window.clearInterval(intervalId);
+  }, [auth.isLoggedIn, auth.token, auth.user?._id]);
+
   const loginUser = (token, user) => {
     setAuth({
       isLoggedIn: true,

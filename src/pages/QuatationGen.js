@@ -632,7 +632,7 @@ const QuatationGen = () => {
 
         <div className="print-footer print:block">
           <div className="text-center text-xs border-t border-gray-300 bg-white py-1 px-3 shadow-sm">
-            📍 235 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +91 9226258656 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            📍 300 Gov. Press Colony DABHA, Nagpur, 440023 &nbsp; | &nbsp; ✉️ info@parnanetra.org - parnanetra.org &nbsp; | &nbsp; 📞 +91 9226258656 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <strong>{t.farmer.name}:</strong> {quotation.farmerInfo?.name} &nbsp;&nbsp;&nbsp;
             <strong>{t.farmer.number}:</strong> {quotation.farmerInfo?.number}
           </div>

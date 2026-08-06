@@ -73,8 +73,10 @@ export default function QuotationCalendar() {
     const loadCalendar = async () => {
       try {
         setLoading(true);
-        const data = await getQuotationCalendarFeed();
-        setQuotations(data || []);
+       const response = await getQuotationCalendarFeed();
+      console.log(response);
+console.log(response[0]);
+setQuotations(response || []);
       } catch (error) {
         setAlert({
           message: "Unable to load quotation calendar",
@@ -117,6 +119,20 @@ export default function QuotationCalendar() {
     });
     return Array.from(map.values());
   }, [selectedEntries]);
+
+  useEffect(() => {
+    if (!loading && Object.keys(groupedByDate).length > 0) {
+      const hasSelected = selectedDate && groupedByDate[selectedDate];
+      if (!hasSelected) {
+        const firstAvailableDate = Object.keys(groupedByDate).sort()[0];
+        setSelectedDate(firstAvailableDate);
+        const firstDate = new Date(`${firstAvailableDate}T00:00:00`);
+        if (!Number.isNaN(firstDate.getTime())) {
+          setVisibleMonth(new Date(firstDate.getFullYear(), firstDate.getMonth(), 1));
+        }
+      }
+    }
+  }, [loading, groupedByDate, selectedDate]);
 
   const filteredQuotations = useMemo(() => {
     if (!searchQuery.trim()) return selectedQuotations;
