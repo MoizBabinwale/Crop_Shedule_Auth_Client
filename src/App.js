@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Navbar from "./components/Navbar";
+import ScrollToTop from "./components/ScrollToTop";
 import AllRoutes from "./routes/AllRoutes";
 import { ToastContainer } from "react-toastify";
 import Footer from "./components/Footer";
@@ -18,6 +19,7 @@ function App() {
         <Router>
           <NotificationProvider>
             <Navbar />
+            <ScrollToTop />
             <AllRoutes />
              <SpeedInsights />
           </NotificationProvider>

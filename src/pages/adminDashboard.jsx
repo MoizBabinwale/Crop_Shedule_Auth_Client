@@ -150,6 +150,7 @@ export default function AdminDashboard() {
     canSeeSchedule: false,
     canRemoveSchedule: false,
     canAccessQuotationCalendar: false,
+      canActiveQuotation: false,
   });
 
   const updateUserDetails = async () => {
@@ -194,7 +195,7 @@ export default function AdminDashboard() {
       role: user.role || "user",
       approved: user.approved || false,
       isActive: user.isActive !== false,
-      status: user.isActive === false ? "non-active" : user.approved ? "approved" : "pending",
+      status: user.approved ? "approved" : "pending",
       place: user.place || "",
       tahsil: user.tahsil || "",
       district: user.district || "",
@@ -204,6 +205,7 @@ export default function AdminDashboard() {
       canSeeSchedule: user.canSeeSchedule || false,
       canRemoveSchedule: user.canRemoveSchedule || false,
       canAccessQuotationCalendar: user.canAccessQuotationCalendar || false,
+        canActiveQuotation: user.canActiveQuotation || false,
     });
     setEditUserModal(true);
   };
@@ -547,16 +549,13 @@ export default function AdminDashboard() {
                   value={editForm.status}
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                   className={`p-2 border rounded w-full ${
-                    editForm.status === "non-active"
-                      ? "bg-[#FEE2E2] text-[#991B1B] border-[#EF4444]"
-                      : editForm.status === "approved"
+                    editForm.status === "approved"
                       ? "bg-green-100 text-green-800 border-green-300"
                       : "bg-yellow-100 text-yellow-800 border-yellow-300"
                   }`}
                 >
                   <option value="approved">Approved & Active</option>
                   <option value="pending">Pending approval</option>
-                  <option value="non-active">Non-active</option>
                 </select>
                 <p className="text-xs text-gray-500">Set whether the user can log in and whether their account is approved.</p>
               </label>
@@ -571,24 +570,53 @@ export default function AdminDashboard() {
                 <p className="text-xs text-gray-500">Control which users this user can see in the admin list.</p>
               </label>
 
-              <label className="flex items-center gap-2 rounded border p-2 bg-white">
-                <input type="checkbox" checked={editForm.canSeeSchedule} onChange={(e) => setEditForm({ ...editForm, canSeeSchedule: e.target.checked })} />
-                <span className="text-sm">Can view schedules</span>
+              <label className="flex flex-col gap-1 rounded border p-3 bg-white">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked={editForm.canSeeSchedule} onChange={(e) => setEditForm({ ...editForm, canSeeSchedule: e.target.checked })} />
+                  <span className="text-sm font-medium">Can view farmer schedules</span>
+                </div>
+                <p className="text-xs text-gray-500">Allows this user to view schedules created for farmers.</p>
               </label>
 
-              <label className="flex items-center gap-2 rounded border p-2 bg-white">
-                <input type="checkbox" checked={editForm.canEditSchedule} onChange={(e) => setEditForm({ ...editForm, canEditSchedule: e.target.checked })} />
-                <span className="text-sm">Can create or update schedules</span>
+              <label className="flex flex-col gap-1 rounded border p-3 bg-white">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked={editForm.canEditSchedule} onChange={(e) => setEditForm({ ...editForm, canEditSchedule: e.target.checked })} />
+                  <span className="text-sm font-medium">Can create or update schedules</span>
+                </div>
+                <p className="text-xs text-gray-500">Grants permission to create new schedules or edit existing ones.</p>
               </label>
 
-              <label className="flex items-center gap-2 rounded border p-2 bg-white">
-                <input type="checkbox" checked={editForm.canRemoveSchedule} onChange={(e) => setEditForm({ ...editForm, canRemoveSchedule: e.target.checked })} />
-                <span className="text-sm">Can delete schedules</span>
+              <label className="flex flex-col gap-1 rounded border p-3 bg-white">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked={editForm.canRemoveSchedule} onChange={(e) => setEditForm({ ...editForm, canRemoveSchedule: e.target.checked })} />
+                  <span className="text-sm font-medium">Can remove schedules</span>
+                </div>
+                <p className="text-xs text-gray-500">Allows deleting schedules (use with caution).</p>
               </label>
 
-              <label className="flex items-center gap-2 rounded border p-2 bg-white">
-                <input type="checkbox" checked={editForm.canAccessQuotationCalendar} onChange={(e) => setEditForm({ ...editForm, canAccessQuotationCalendar: e.target.checked })} />
-                <span className="text-sm">Can access quotation calendar</span>
+              <label className="flex flex-col gap-1 rounded border p-3 bg-white">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" checked={editForm.canAccessQuotationCalendar} onChange={(e) => setEditForm({ ...editForm, canAccessQuotationCalendar: e.target.checked })} />
+                  <span className="text-sm font-medium">Can access quotation calendar</span>
+                </div>
+                <p className="text-xs text-gray-500">Allows opening the shared quotation calendar and sending reminders.</p>
+              </label>
+
+              <label className="flex flex-col gap-1 rounded border p-3 bg-white">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editForm.canActiveQuotation}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        canActiveQuotation: e.target.checked,
+                      })
+                    }
+                  />
+                  <span className="text-sm font-medium">Can activate / deactivate quotations</span>
+                </div>
+                <p className="text-xs text-gray-500">When enabled the user can toggle a quotation's active state (affects calendar visibility).</p>
               </label>
 
               <input placeholder="Place" value={editForm.place} onChange={(e) => setEditForm({ ...editForm, place: e.target.value })} className="p-2 border rounded" />

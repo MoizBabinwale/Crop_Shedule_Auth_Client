@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaPhone, FaSearch, FaWhatsapp } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
-import Loading from "../components/Loading";
 import CommonAlert from "../components/CommonAlert";
 import { getQuotationCalendarFeed, sendQuotationWhatsAppAlert } from "../api/api";
 import { useNavigate } from "react-router-dom";
@@ -66,31 +65,63 @@ export default function QuotationCalendar() {
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [searchQuery, setSearchQuery] = useState("");
   const [alert, setAlert] = useState({ message: "", type: "success" });
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const canView = auth?.user?.role === "admin" || auth?.user?.canAccessQuotationCalendar;
 
-  useEffect(() => {
-    const loadCalendar = async () => {
-      try {
-        setLoading(true);
-       const response = await getQuotationCalendarFeed();
-      console.log(response);
-console.log(response[0]);
-setQuotations(response || []);
-      } catch (error) {
-        setAlert({
-          message: "Unable to load quotation calendar",
-          type: "error",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  
+useEffect(() => {
+  const loadCalendar = async () => {
+    try {
+      setLoading(true);
 
-    if (!authLoading && canView) {
-      loadCalendar();
+      const month = currentDate.getMonth() + 1;
+      const year = currentDate.getFullYear();
+
+      const data = await getQuotationCalendarFeed(month, year);
+
+      setQuotations(data);
+      // sync visible month to the loaded month so the calendar grid updates
+      setVisibleMonth(new Date(year, month - 1, 1));
+    } catch (err) {
+      setAlert({
+        message: "Unable to load quotation calendar",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
     }
-  }, [authLoading, canView]);
+  };
+
+  if (!authLoading && canView) {
+    loadCalendar();
+  }
+}, [authLoading, canView, currentDate]);
+
+const previousMonth = () => {
+  setCurrentDate(
+    new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1,
+      1
+    )
+  );
+};
+
+const nextMonth = () => {
+  setCurrentDate(
+    new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      1
+    )
+  );
+};
+
+// Keep visibleMonth in sync with currentDate navigation
+useEffect(() => {
+  setVisibleMonth(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1));
+}, [currentDate]);
 
   const groupedByDate = useMemo(() => {
     return quotations.reduce((acc, quotation) => {
@@ -107,7 +138,9 @@ setQuotations(response || []);
 
   const monthCells = useMemo(() => getMonthStartGrid(visibleMonth), [visibleMonth]);
 
-  const selectedEntries = selectedDate ? groupedByDate[selectedDate] || [] : [];
+  const selectedEntries = useMemo(() => {
+    return selectedDate ? groupedByDate[selectedDate] || [] : [];
+  }, [groupedByDate, selectedDate]);
 
   const selectedQuotations = useMemo(() => {
     const map = new Map();
@@ -120,24 +153,25 @@ setQuotations(response || []);
     return Array.from(map.values());
   }, [selectedEntries]);
 
-  useEffect(() => {
-    if (!loading && Object.keys(groupedByDate).length > 0) {
-      const hasSelected = selectedDate && groupedByDate[selectedDate];
-      if (!hasSelected) {
-        const firstAvailableDate = Object.keys(groupedByDate).sort()[0];
-        setSelectedDate(firstAvailableDate);
-        const firstDate = new Date(`${firstAvailableDate}T00:00:00`);
-        if (!Number.isNaN(firstDate.getTime())) {
-          setVisibleMonth(new Date(firstDate.getFullYear(), firstDate.getMonth(), 1));
-        }
-      }
-    }
-  }, [loading, groupedByDate, selectedDate]);
+  const resolvedSelectedQuotations = useMemo(
+    () =>
+      selectedQuotations.map((entry) => ({
+        ...entry,
+        quotation: {
+          ...entry.quotation,
+          farmerInfo: entry.quotation.farmerInfo || entry.quotation.farmer || {},
+        },
+      })),
+    [selectedQuotations],
+  );
 
+  // Keep the selected date even if that day has no scheduled quotations.
+  // This avoids auto-jumping the calendar to another month when users click an empty date.
   const filteredQuotations = useMemo(() => {
-    if (!searchQuery.trim()) return selectedQuotations;
-    return selectedQuotations.filter(({ quotation }) => matchesSearchQuery(quotation, searchQuery));
-  }, [selectedQuotations, searchQuery]);
+    const source = resolvedSelectedQuotations;
+    if (!searchQuery.trim()) return source;
+    return source.filter(({ quotation }) => matchesSearchQuery(quotation, searchQuery));
+  }, [resolvedSelectedQuotations, searchQuery]);
 
   const handleWhatsApp = async (quotationId, weekNumber) => {
     try {
@@ -169,14 +203,6 @@ setQuotations(response || []);
     }
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="page-shell flex min-h-[60vh] items-center justify-center">
-        <Loading />
-      </div>
-    );
-  }
-
   if (!canView) {
     return (
       <div className="page-shell">
@@ -193,7 +219,7 @@ setQuotations(response || []);
 
   return (
     <div className="page-shell">
-      <div className="container-pro mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="container-pro w-full max-w-full px-4 py-6 sm:px-6 lg:px-8">
         <div className="panel-pro overflow-hidden rounded-3xl border border-green-900/10 bg-gradient-to-br from-emerald-50 via-white to-lime-50 p-6 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -209,7 +235,7 @@ setQuotations(response || []);
 
             <div className="flex items-center gap-2 rounded-2xl border border-green-900/10 bg-white p-2 shadow-sm">
               <button
-                onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1))}
+               onClick={previousMonth}
                 className="rounded-xl p-2 text-green-700 hover:bg-green-50"
                 aria-label="Previous month"
               >
@@ -220,7 +246,7 @@ setQuotations(response || []);
                 <div className="text-xl font-bold text-green-900">{visibleMonth.getFullYear()}</div>
               </div>
               <button
-                onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1))}
+                onClick={nextMonth}
                 className="rounded-xl p-2 text-green-700 hover:bg-green-50"
                 aria-label="Next month"
               >
@@ -241,45 +267,50 @@ setQuotations(response || []);
 
               <div className="mt-2 grid grid-cols-7 gap-2">
                 {monthCells.map((cell, index) => {
+                  const isSkeleton = loading;
                   if (!cell) {
-                    return <div key={`empty-${index}`} className="min-h-[110px] rounded-2xl bg-gray-50/70" />;
+                    return <div key={`empty-${index}`} className={`min-h-[110px] rounded-2xl ${isSkeleton ? "bg-slate-200/70 animate-pulse" : "bg-gray-50/70"}`} />;
                   }
 
                   const key = getLocalDateKey(cell);
-                  const items = groupedByDate[key] || [];
+                  const items = loading ? [] : groupedByDate[key] || [];
                   const isSelected = key === selectedDate;
                   const isToday = key === getLocalDateKey(new Date());
-                  const hasItems = items.length > 0;
+                  const hasItems = !loading && items.length > 0;
 
                   return (
                     <button
                       key={key}
                       onClick={() => {
-                        setSelectedDate(key);
-                        setVisibleMonth(new Date(cell.getFullYear(), cell.getMonth(), 1));
+                        if (!loading) {
+                          setSelectedDate(key);
+                          setVisibleMonth(new Date(cell.getFullYear(), cell.getMonth(), 1));
+                        }
                       }}
+                      disabled={loading}
                       className={`min-h-[110px] rounded-2xl border p-3 text-left transition ${
-                        isSelected ? "border-green-600 bg-green-50 shadow-md" : "border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/60"
+                        loading
+                          ? "border-slate-200 bg-slate-100 shadow-none animate-pulse"
+                          : isSelected
+                          ? "border-green-600 bg-green-50 shadow-md"
+                          : "border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/60"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className={`text-lg font-bold ${isToday ? "text-green-700" : "text-gray-800"}`}>{cell.getDate()}</div>
+                        <div className={`text-lg font-bold ${loading ? "bg-slate-300/90 text-transparent rounded-md px-3 py-1" : isToday ? "text-green-700" : "text-gray-800"}`}>{loading ? "00" : cell.getDate()}</div>
                         {hasItems && <span className="rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">{items.length}</span>}
                       </div>
 
                       <div className="mt-3 space-y-2">
-                        {hasItems ? (
-                          items.slice(0, 2).map((entry) => (
-                            <div key={`${entry.quotation._id}-${entry.week.weekNumber}`} className="rounded-xl bg-green-100/70 px-2 py-1 text-xs text-green-900">
-                              <div className="font-semibold">{entry.quotation.farmerInfo?.name || "Farmer"}</div>
-                              <div className="truncate">{entry.quotation.cropName || "Quotation"}</div>
-                            </div>
-                          ))
+                        {loading ? (
+                          <div className="h-3 w-16 rounded-full bg-slate-300/90" />
+                        ) : hasItems ? (
+                          <div className="rounded-xl bg-green-100/70 px-2 py-1 text-center text-xs font-semibold text-green-900">
+                            {items.length} Schedule{items.length > 1 ? "s" : ""}
+                          </div>
                         ) : (
                           <div className="text-xs text-gray-400">No schedules</div>
                         )}
-
-                        {items.length > 2 && <div className="text-xs font-semibold text-green-700">+{items.length - 2} more</div>}
                       </div>
                     </button>
                   );
@@ -294,8 +325,17 @@ setQuotations(response || []);
                   <h2 className="mt-1 text-2xl font-bold text-gray-900">{selectedDate ? new Date(`${selectedDate}T00:00:00`).toLocaleDateString() : "No date selected"}</h2>
                 </div>
                 <div className="rounded-2xl bg-green-50 px-4 py-3 text-center">
-                  <div className="text-2xl font-bold text-green-700">{filteredQuotations.length}</div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-green-700">{searchQuery.trim() ? "Filtered" : "Schedules"}</div>
+                  {loading ? (
+                    <div className="space-y-2">
+                      <div className="mx-auto h-8 w-12 rounded bg-slate-300/90 animate-pulse" />
+                      <div className="mx-auto h-3 w-20 rounded bg-slate-300/90 animate-pulse" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-2xl font-bold text-green-700">{filteredQuotations.length}</div>
+                      <div className="text-xs font-semibold uppercase tracking-wide text-green-700">{searchQuery.trim() ? "Filtered" : "Schedules"}</div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -312,15 +352,31 @@ setQuotations(response || []);
 
               {searchQuery.trim() && (
                 <p className="mt-2 text-xs text-gray-500">
-                  Showing {filteredQuotations.length} of {selectedQuotations.length} schedule
-                  {selectedQuotations.length === 1 ? "" : "s"} for this date
+                  Showing {filteredQuotations.length} of {resolvedSelectedQuotations.length} schedule
+                  {resolvedSelectedQuotations.length === 1 ? "" : "s"} for this date
                 </p>
               )}
 
               <div className="mt-5 max-h-[72vh] space-y-4 overflow-y-auto pr-1">
-                {filteredQuotations.length > 0 ? (
+                {loading ? (
+                  [1, 2, 3].map((index) => (
+                    <div key={index} className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm animate-pulse">
+                      <div className="h-5 w-40 rounded bg-slate-300/90" />
+                      <div className="mt-3 grid gap-3 rounded-2xl bg-slate-200/90 p-4 text-sm text-gray-700 sm:grid-cols-2">
+                        <div className="h-10 rounded bg-slate-300/90" />
+                        <div className="h-10 rounded bg-slate-300/90" />
+                        <div className="h-10 rounded bg-slate-300/90" />
+                        <div className="h-10 rounded bg-slate-300/90" />
+                      </div>
+                      <div className="mt-4 space-y-3">
+                        <div className="h-24 rounded-2xl bg-slate-200/90" />
+                        <div className="h-24 rounded-2xl bg-slate-200/90" />
+                      </div>
+                    </div>
+                  ))
+                ) : filteredQuotations.length > 0 ? (
                   filteredQuotations.map(({ quotation, weeks }) => {
-                    const farmer = quotation.farmerInfo || {};
+                    const farmer = quotation.farmerInfo || quotation.farmer || {};
 
                     return (
                       <div key={quotation._id} className="rounded-3xl border border-gray-200 bg-gradient-to-br from-white to-green-50 p-4 shadow-sm">
@@ -352,7 +408,7 @@ setQuotations(response || []);
                           </div>
                           <div>
                             <div className="font-semibold text-gray-500">Acres</div>
-                            <div className="font-medium text-gray-900">{quotation.acres || "N/A"}</div>
+                            <div className="font-medium text-gray-900">{quotation.acres != null ? quotation.acres : "N/A"}</div>
                           </div>
                         </div>
 

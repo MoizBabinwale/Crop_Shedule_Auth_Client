@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getAllQuotations, deleteQuotation, getUserQuotations, updateQuotation, getQuotationById } from "../api/api";
+import { getAllQuotations, deleteQuotation, getUserQuotations, updateQuotation, updateQuotationActiveState, getQuotationById } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import banner from "../assets/images.jpg";
 import Loading from "../components/Loading";
@@ -56,7 +56,7 @@ function QuotationMaster() {
     } finally {
       setLoading(false);
     }
-  }, [auth]);
+  }, []);
 
   useEffect(() => {
     if (!authLoading) {
@@ -118,6 +118,17 @@ function QuotationMaster() {
     } catch (err) {
       console.error(err);
       setAlert({ message: "Update failed ❌", type: "error" });
+    }
+  };
+
+  const toggleQuotationActive = async (id, newState) => {
+    try {
+      await updateQuotationActiveState(id, newState);
+      setAlert({ message: `Quotation ${newState ? "activated" : "deactivated"} ✅`, type: "success" });
+      fetchQuotations();
+    } catch (err) {
+      console.error(err);
+      setAlert({ message: "Failed to change quotation state ❌", type: "error" });
     }
   };
 
@@ -206,6 +217,22 @@ function QuotationMaster() {
                             <button onClick={() => openDeleteConfirm(q._id, q.cropName)} className="text-red-600 hover:text-red-800" title="Delete">
                               <FaTrash size={18} />
                             </button>
+
+                            {/* Activate / Deactivate */}
+                            {(auth.user?.role === "admin" || auth.user?.canActiveQuotation) && (
+                              (() => {
+                                const isActive = q.isActive !== false; // treat undefined as active
+                                return (
+                                  <button
+                                    onClick={() => toggleQuotationActive(q._id, !isActive)}
+                                    className={`px-2 py-1 rounded text-sm ${isActive ? "bg-amber-600 text-white" : "bg-green-400 text-white"}`}
+                                    title={isActive ? "Deactivate quotation" : "Activate quotation"}
+                                  >
+                                    {isActive ? "Deactivate" : "Activate"}
+                                  </button>
+                                );
+                              })()
+                            )}
                           </>
                         )}
                       </td>

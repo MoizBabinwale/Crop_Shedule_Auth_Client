@@ -188,24 +188,43 @@ export const getAllQuotations = async () => {
   }
 };
 
-export const getQuotationCalendarFeed = async () => {
+export const getQuotationCalendarFeed = async (month, year) => {
   try {
-    const token = sessionStorage.getItem("token");
-    const res = await axios.get(`${BASE_URL}/quotations/calendar`, {
+    const token = sessionStorage.getItem("token"); // ✅ moved here
+
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+  const res = await axios.get(
+    `${BASE_URL}/quotations/calendar?month=${month}&year=${year}`,
+    {
       headers: {
-        Authorization: `Bearer ${token}`,
+       Authorization: `Bearer ${token}`,
       },
-    });
-    return res.data.quotations || [];
-  } catch (error) {
-    console.error("Error fetching quotation calendar feed:", error);
-    throw error;
+    }
+  );
+
+  return res.data.quotations;
+  }
+   catch (error) {
+    console.error("Error creating quotation:", error);
+    throw new Error(error.response?.data?.error || "Failed to create quotation.");
   }
 };
 
 export const getQuotationById = async (id) => {
   try {
-    const res = await axios.get(`${BASE_URL}/quotations/${id}`);
+      const token = sessionStorage.getItem("token"); // ✅ moved here
+
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+
+    const res = await axios.get(`${BASE_URL}/quotations/${id}`,{
+      headers: {
+       Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (error) {
     console.error("Error creating quotation:", error);
@@ -214,13 +233,41 @@ export const getQuotationById = async (id) => {
 };
 
 export const updateQuotation = async (id, data) => {
-  const res = await fetch(`${BASE_URL}/quotations/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+  const token = sessionStorage.getItem("token"); // ✅ moved here
+
+  if (!token) {
+    throw new Error("No auth token found");
+  }
+
+  const res = await axios.put(`${BASE_URL}/quotations/${id}`, data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   });
-  if (!res.ok) throw new Error("Failed to update quotation");
-  return res.json();
+
+  return res.data;
+};
+
+export const updateQuotationActiveState = async (id, isActive) => {
+  const token = sessionStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("No auth token found");
+  }
+
+  const res = await axios.put(
+    `${BASE_URL}/quotations/${id}/active`,
+    { isActive },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return res.data;
 };
 
 export const deleteQuotation = async (id) => {
