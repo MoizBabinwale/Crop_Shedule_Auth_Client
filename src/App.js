@@ -9,6 +9,7 @@ import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
 
@@ -22,6 +23,7 @@ function App() {
             <ScrollToTop />
             <AllRoutes />
              <SpeedInsights />
+             <Analytics />
           </NotificationProvider>
           <ToastContainer />
           <Footer />
